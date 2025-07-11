@@ -17,19 +17,22 @@ export const authOptions: NextAuthOptions = {
             password: credentials?.password,
           });
 
-          const user = res.data?.data?.user;
-          const accessToken = res.data?.data?.accessToken;
+          const user = res?.data?.user;
+          const accessToken = res?.data?.access_token;
+          const refreshToken = res?.data?.access_token;
 
-          if (user && accessToken) {
+          if (user && accessToken && refreshToken) {
             return {
               ...user,
               accessToken,
+              refreshToken,
               role: user.role,
             };
           }
 
           return null;
         } catch (error) {
+          console.log(error);
           const message = (error as any)?.response?.data?.message || (error as any)?.message || 'Something went wrong';
           throw new Error(message);
         }
@@ -43,6 +46,8 @@ export const authOptions: NextAuthOptions = {
       if (user?.accessToken) {
         // @ts-ignore
         token.accessToken = user.accessToken;
+        // @ts-ignore
+        token.refreshToken = user.refreshToken;
         token.userData = {
           ...user,
         };

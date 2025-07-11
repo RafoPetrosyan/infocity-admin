@@ -5,7 +5,9 @@ import Button from '@/components/ui/button/Button';
 import { EyeCloseIcon, EyeIcon } from '@/icons';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSignInMutation } from '@/store/auth';
+import { signIn } from 'next-auth/react';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 type SignInFormInputs = {
   email: string;
@@ -13,9 +15,9 @@ type SignInFormInputs = {
 };
 
 export default function SignInForm() {
-  const [signIn, { isLoading, data, error }] = useSignInMutation();
-
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -23,13 +25,20 @@ export default function SignInForm() {
   } = useForm<SignInFormInputs>();
 
   const onSubmit = async (data: SignInFormInputs) => {
-    try {
-      const result = await signIn(data).unwrap();
-      console.log('SignIn Success:', result);
-      // Save token to localStorage or Redux here
-    } catch (err) {
-      console.error('SignIn Error:', err);
+    setLoading(true);
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
+
+    if (result?.error) {
+      toast.error('Invalid email or password');
+    } else {
+      router.replace('/');
     }
+    setLoading(false);
   };
 
   return (
@@ -92,7 +101,7 @@ export default function SignInForm() {
 
             {/* Submit Button */}
             <div>
-              <Button className="w-full" size="sm" type="submit" loading={isLoading}>
+              <Button className="w-full" size="sm" type="submit" loading={loading}>
                 Sign in
               </Button>
             </div>

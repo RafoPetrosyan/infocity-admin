@@ -7,19 +7,21 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret });
   const pathname = req.nextUrl.pathname;
 
-  // Allow access to sign-in page
+  // @ts-ignore
+  if (pathname === '/sign-in' && token && token.userData?.role === 'super-admin') {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
   if (pathname === '/sign-in') {
     return NextResponse.next();
   }
 
-  // If no token, redirect to sign-in
   if (!token) {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
-  // If user is not auth, redirect (adjust role key as needed)
-  // @ts-ignore: if `userData` is not typed
-  if (token.userData?.role !== 'super-auth') {
+  // @ts-ignore
+  if (token.userData?.role !== 'super-admin') {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
