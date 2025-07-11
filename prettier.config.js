@@ -1,5 +1,4 @@
-/** @type {import('prettier').Config} */
-const config = {
+module.exports = {
   endOfLine: 'lf',
   semi: true,
   singleQuote: true,
@@ -8,5 +7,3 @@ const config = {
   printWidth: 120,
   plugins: ['prettier-plugin-tailwindcss'],
 };
-
-export default config;

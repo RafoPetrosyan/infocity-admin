@@ -17,9 +17,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
-  // If user is not admin, redirect (adjust role key as needed)
+  // If user is not auth, redirect (adjust role key as needed)
   // @ts-ignore: if `userData` is not typed
-  if (token.userData?.role !== 'super-admin') {
+  if (token.userData?.role !== 'super-auth') {
     return NextResponse.redirect(new URL('/sign-in', req.url));
   }
 
