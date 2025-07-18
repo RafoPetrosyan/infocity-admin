@@ -12,14 +12,31 @@ export const authOptions: NextAuthOptions = {
 			},
 			async authorize(credentials) {
 				try {
-					const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/sign-in`, {
-						email: credentials?.email,
-						password: credentials?.password,
-					});
+					let res;
+					// @ts-ignore
+					if (!credentials?.userData) {
+						res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/sign-in`, {
+							email: credentials?.email,
+							password: credentials?.password,
+						});
+					}
 
-					const user = res?.data?.user;
-					const accessToken = res?.data?.access_token;
-					const refreshToken = res?.data?.refresh_token;
+					// @ts-ignore
+					let newUserData = credentials?.userData;
+					if (typeof newUserData === "string") {
+						try {
+							newUserData = JSON.parse(newUserData);
+						} catch {
+							newUserData = {};
+						}
+					}
+
+					// @ts-ignore
+					const user = res ? res?.data?.user : newUserData;
+					// @ts-ignore
+					const accessToken = res ? res?.data?.access_token : credentials.accessToken;
+					// @ts-ignore
+					const refreshToken = res ? res?.data?.refresh_token : credentials.refreshToken;
 
 					if (user && accessToken && refreshToken) {
 						return {
@@ -41,7 +58,7 @@ export const authOptions: NextAuthOptions = {
 	],
 
 	callbacks: {
-		async jwt({ token, user, trigger, session, account, profile }) {
+		async jwt({ token, user }) {
 			// @ts-ignore
 			if (user?.accessToken) {
 				// @ts-ignore
@@ -51,20 +68,6 @@ export const authOptions: NextAuthOptions = {
 				token.userData = {
 					...user,
 				};
-				return token;
-			}
-
-			if (trigger === "update") {
-				if (session?.userData) {
-					token.userData = {
-						// @ts-ignore
-						...token.userData,
-						...session.userData,
-					};
-				}
-				if (session?.accessToken) {
-					token.accessToken = session.accessToken;
-				}
 				return token;
 			}
 
@@ -79,17 +82,6 @@ export const authOptions: NextAuthOptions = {
 			// @ts-ignore
 			session.accessToken = token.accessToken;
 			return session;
-		},
-	},
-
-	cookies: {
-		csrfToken: {
-			name: "next-auth.csrf-token",
-			options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
-		},
-		pkceCodeVerifier: {
-			name: "next-auth.pkce.code_verifier",
-			options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
 		},
 	},
 

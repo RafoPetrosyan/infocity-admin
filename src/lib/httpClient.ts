@@ -1,11 +1,5 @@
-import { setAccessToken } from "@/store/auth/reducer";
-import { AppStore } from "@/store/store";
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
-
-let store: AppStore | null = null;
-export const setHttpClientStore = (appStore: AppStore) => {
-	store = appStore;
-};
+import { signIn, signOut } from "next-auth/react";
 
 const httpClient: AxiosInstance = axios.create({
 	baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -42,9 +36,9 @@ httpClient.interceptors.response.use(
 		const originalRequest: any = error.config;
 
 		if (error.response?.status === 401) {
-			// localStorage.removeItem("accessToken");
-			// localStorage.removeItem("refreshToken");
-			// window.location.href = "/sign-in"; // or your login route
+			localStorage.removeItem("accessToken");
+			localStorage.removeItem("refreshToken");
+			await signOut();
 			return Promise.reject(error);
 		}
 
@@ -75,7 +69,12 @@ httpClient.interceptors.response.use(
 				});
 
 				const newAccessToken = response.data.access_token;
-				// store?.dispatch(setAccessToken(newAccessToken));
+				await signIn("credentials", {
+					redirect: false,
+					accessToken: newAccessToken,
+					refreshToken,
+					userData: JSON.stringify(response.data.user),
+				});
 				localStorage.setItem("accessToken", newAccessToken);
 
 				processQueue(null, newAccessToken);
@@ -84,9 +83,9 @@ httpClient.interceptors.response.use(
 				return httpClient(originalRequest);
 			} catch (err: any) {
 				processQueue(err, null);
-				// localStorage.removeItem("accessToken");
-				// localStorage.removeItem("refreshToken");
-				// window.location.href = "/sign-in";
+				localStorage.removeItem("accessToken");
+				localStorage.removeItem("refreshToken");
+				await signOut();
 				return Promise.reject(err);
 			} finally {
 				isRefreshing = false;
