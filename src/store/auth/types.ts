@@ -16,5 +16,4 @@ export interface UsersResponse {
 export interface UsersState {
 	currentUser: User | null;
 	loading: boolean;
-	accessToken: string;
 }

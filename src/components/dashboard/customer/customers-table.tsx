@@ -19,6 +19,7 @@ import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 
 import { useSelection } from "@/hooks/use-selection";
+import { CustomersFilters } from "@/components/dashboard/customer/customers-filters";
 
 function noop(): void {
 	// do nothing
@@ -64,77 +65,98 @@ export function CustomersTable({
 	const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
 	return (
-		<Card>
-			<Box sx={{ overflowX: "auto" }}>
-				<Table sx={{ minWidth: "800px" }}>
-					<TableHead>
-						<TableRow>
-							<TableCell padding="checkbox">
-								<Checkbox
-									checked={selectedAll}
-									indeterminate={selectedSome}
-									onChange={(event) => {
-										if (event.target.checked) {
-											selectAll();
-										} else {
-											deselectAll();
-										}
-									}}
-								/>
-							</TableCell>
-							<TableCell>Name</TableCell>
-							<TableCell>Email</TableCell>
-							<TableCell>Location</TableCell>
-							<TableCell>Phone</TableCell>
-							<TableCell>Signed Up</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{rows.map((row) => {
-							const isSelected = selected?.has(row.id);
+		<>
+			<Stack direction="row">
+				<Stack spacing={1} sx={{ flex: "1 1 auto" }}>
+					<Typography variant="h4">Customers</Typography>
+					{/*<Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>*/}
+					{/*	<Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>*/}
+					{/*		Import*/}
+					{/*	</Button>*/}
+					{/*	<Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>*/}
+					{/*		Export*/}
+					{/*	</Button>*/}
+					{/*</Stack>*/}
+				</Stack>
+				<div>
+					{/*<Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">*/}
+					{/*  Add*/}
+					{/*</Button>*/}
+				</div>
+			</Stack>
+			<CustomersFilters />
+			<Card>
+				<Box sx={{ overflowX: "auto" }}>
+					<Table sx={{ minWidth: "800px" }}>
+						<TableHead>
+							<TableRow>
+								<TableCell padding="checkbox">
+									<Checkbox
+										checked={selectedAll}
+										indeterminate={selectedSome}
+										onChange={(event) => {
+											if (event.target.checked) {
+												selectAll();
+											} else {
+												deselectAll();
+											}
+										}}
+									/>
+								</TableCell>
+								<TableCell>Name</TableCell>
+								<TableCell>Email</TableCell>
+								<TableCell>Location</TableCell>
+								<TableCell>Phone</TableCell>
+								<TableCell>Signed Up</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{rows.map((row) => {
+								const isSelected = selected?.has(row.id);
 
-							return (
-								<TableRow hover key={row.id} selected={isSelected}>
-									<TableCell padding="checkbox">
-										<Checkbox
-											checked={isSelected}
-											onChange={(event) => {
-												if (event.target.checked) {
-													selectOne(row.id);
-												} else {
-													deselectOne(row.id);
-												}
-											}}
-										/>
-									</TableCell>
-									<TableCell>
-										<Stack sx={{ alignItems: "center" }} direction="row" spacing={2}>
-											<Avatar src={row.avatar} />
-											<Typography variant="subtitle2">{row.name}</Typography>
-										</Stack>
-									</TableCell>
-									<TableCell>{row.email}</TableCell>
-									<TableCell>
-										{row.address.city}, {row.address.state}, {row.address.country}
-									</TableCell>
-									<TableCell>{row.phone}</TableCell>
-									<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
-								</TableRow>
-							);
-						})}
-					</TableBody>
-				</Table>
-			</Box>
-			<Divider />
-			<TablePagination
-				component="div"
-				count={count}
-				onPageChange={noop}
-				onRowsPerPageChange={noop}
-				page={page}
-				rowsPerPage={rowsPerPage}
-				rowsPerPageOptions={[5, 10, 25]}
-			/>
-		</Card>
+								return (
+									<TableRow hover key={row.id} selected={isSelected}>
+										<TableCell padding="checkbox">
+											<Checkbox
+												checked={isSelected}
+												onChange={(event) => {
+													if (event.target.checked) {
+														selectOne(row.id);
+													} else {
+														deselectOne(row.id);
+													}
+												}}
+											/>
+										</TableCell>
+										<TableCell>
+											<Stack sx={{ alignItems: "center" }} direction="row" spacing={2}>
+												<Avatar src={row.avatar} />
+												<Typography variant="subtitle2">{row.name}</Typography>
+											</Stack>
+										</TableCell>
+										<TableCell>{row.email}</TableCell>
+										<TableCell>
+											{row.address.city}, {row.address.state}, {row.address.country}
+										</TableCell>
+										<TableCell>{row.phone}</TableCell>
+										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
+									</TableRow>
+								);
+							})}
+						</TableBody>
+					</Table>
+				</Box>
+				<Divider />
+				<TablePagination
+					component="div"
+					count={count}
+					onPageChange={noop}
+					onRowsPerPageChange={noop}
+					page={page}
+					rowsPerPage={rowsPerPage}
+					rowsPerPageOptions={[5, 10, 25]}
+				/>
+			</Card>
+		</>
 	);
 }

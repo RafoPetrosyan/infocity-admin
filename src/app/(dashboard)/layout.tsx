@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useEffect } from "react";
-import { setAccessToken, setCurrentUser } from "@/store/auth/reducer";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setCurrentUser } from "@/store/auth/reducer";
+import { useAppDispatch } from "@/store/hooks";
 import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -34,14 +34,6 @@ const Loader = () => (
 export default function Layout({ children }: LayoutProps): React.JSX.Element {
 	const dispatch = useAppDispatch();
 	const { data: session, status, update } = useSession();
-	const { accessToken } = useAppSelector((state) => state.auth);
-
-	useEffect(() => {
-		if (!accessToken) return;
-
-		update({ accessToken });
-		dispatch(setAccessToken(""));
-	}, [accessToken]);
 
 	useEffect(() => {
 		if (!session) return;
