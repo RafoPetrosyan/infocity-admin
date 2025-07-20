@@ -1,13 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLazyGetUsersQuery } from "@/store/users";
+import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import OutlinedInput from "@mui/material/OutlinedInput";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -17,143 +21,125 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
+import { useDebouncedCallback } from "use-debounce";
 
-import { useSelection } from "@/hooks/use-selection";
-import { CustomersFilters } from "@/components/dashboard/customer/customers-filters";
+export function CustomersTable(): React.JSX.Element {
+	const [page, setPage] = useState(1);
+	const [limit, setLimit] = useState(10);
+	const [search, setSearch] = useState("");
+	const [trigger, { data, isLoading, isError }] = useLazyGetUsersQuery();
 
-function noop(): void {
-	// do nothing
-}
+	const handleChangePage = (_: any, page: number) => {
+		setPage(page + 1);
+		trigger({ page: page + 1, limit, search });
+	};
 
-export interface Customer {
-	id: string;
-	avatar: string;
-	name: string;
-	email: string;
-	address: { city: string; state: string; country: string; street: string };
-	phone: string;
-	createdAt: Date;
-}
+	const handleChangeRowCount = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		const newLimit = +event.target.value;
+		if (newLimit === limit) return;
 
-interface CustomersTableProps {
-	count?: number;
-	page?: number;
-	rows?: Customer[];
-	rowsPerPage?: number;
-}
+		setLimit(newLimit);
+		setPage(1);
+		trigger({ page: 1, limit: newLimit, search });
+	};
 
-export function CustomersTable({
-	count = 0,
-	rows = [],
-	page = 0,
-	rowsPerPage = 0,
-}: CustomersTableProps): React.JSX.Element {
-	const [trigger, { data, isLoading, isError, error }] = useLazyGetUsersQuery();
+	const handleClearSearch = () => {
+		setSearch("");
+		setPage(1);
+		trigger({ page: 1, limit, search: "" });
+	};
+
+	const debouncedSearch = useDebouncedCallback((value: string) => {
+		const trimmed = value.trim();
+		if (trimmed.length === 0 || trimmed.length >= 3) {
+			setPage(1);
+			trigger({ page: 1, limit, search: trimmed });
+		}
+	}, 500);
+
+	const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSearch(event.target.value);
+		setPage(1);
+		debouncedSearch(event.target.value);
+	};
 
 	useEffect(() => {
-		// Call the endpoint with optional query params
-		trigger({}); // or trigger({ page: 1 }) if paginated
-	}, [trigger]);
-
-	const rowIds = React.useMemo(() => {
-		return rows.map((customer) => customer.id);
-	}, [rows]);
-
-	const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
-	const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
-	const selectedAll = rows.length > 0 && selected?.size === rows.length;
+		trigger({ page, limit });
+	}, []);
 
 	return (
 		<>
 			<Stack direction="row">
 				<Stack spacing={1} sx={{ flex: "1 1 auto" }}>
 					<Typography variant="h4">Customers</Typography>
-					{/*<Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>*/}
-					{/*	<Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>*/}
-					{/*		Import*/}
-					{/*	</Button>*/}
-					{/*	<Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>*/}
-					{/*		Export*/}
-					{/*	</Button>*/}
-					{/*</Stack>*/}
 				</Stack>
-				<div>
-					{/*<Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">*/}
-					{/*  Add*/}
-					{/*</Button>*/}
-				</div>
 			</Stack>
-			<CustomersFilters />
+
+			<Card sx={{ p: 2 }}>
+				<OutlinedInput
+					value={search}
+					onChange={handleSearch}
+					fullWidth
+					placeholder="Search customer"
+					startAdornment={
+						<InputAdornment position="start">
+							<SearchOutlinedIcon />
+						</InputAdornment>
+					}
+					endAdornment={
+						search && (
+							<InputAdornment position="end">
+								<IconButton onClick={handleClearSearch} edge="end">
+									<HighlightOffOutlinedIcon />
+								</IconButton>
+							</InputAdornment>
+						)
+					}
+					sx={{ maxWidth: "500px" }}
+				/>
+			</Card>
+
 			<Card>
 				<Box sx={{ overflowX: "auto" }}>
 					<Table sx={{ minWidth: "800px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell padding="checkbox">
-									<Checkbox
-										checked={selectedAll}
-										indeterminate={selectedSome}
-										onChange={(event) => {
-											if (event.target.checked) {
-												selectAll();
-											} else {
-												deselectAll();
-											}
-										}}
-									/>
-								</TableCell>
 								<TableCell>Name</TableCell>
 								<TableCell>Email</TableCell>
-								<TableCell>Location</TableCell>
 								<TableCell>Phone</TableCell>
+								<TableCell>Role</TableCell>
 								<TableCell>Signed Up</TableCell>
 							</TableRow>
 						</TableHead>
-						<TableBody>
-							{rows.map((row) => {
-								const isSelected = selected?.has(row.id);
-
-								return (
-									<TableRow hover key={row.id} selected={isSelected}>
-										<TableCell padding="checkbox">
-											<Checkbox
-												checked={isSelected}
-												onChange={(event) => {
-													if (event.target.checked) {
-														selectOne(row.id);
-													} else {
-														deselectOne(row.id);
-													}
-												}}
-											/>
-										</TableCell>
+						{!isEmpty(data?.data) && (
+							<TableBody>
+								{data?.data.map((row) => (
+									<TableRow hover key={row.id}>
 										<TableCell>
 											<Stack sx={{ alignItems: "center" }} direction="row" spacing={2}>
 												<Avatar src={row.avatar} />
-												<Typography variant="subtitle2">{row.name}</Typography>
+												<Typography variant="subtitle2">{`${row.first_name} ${row.last_name}`}</Typography>
 											</Stack>
 										</TableCell>
 										<TableCell>{row.email}</TableCell>
-										<TableCell>
-											{row.address.city}, {row.address.state}, {row.address.country}
-										</TableCell>
-										<TableCell>{row.phone}</TableCell>
+										<TableCell>{row.phone_number || "-"}</TableCell>
+										<TableCell>{row.role}</TableCell>
 										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
 									</TableRow>
-								);
-							})}
-						</TableBody>
+								))}
+							</TableBody>
+						)}
 					</Table>
 				</Box>
 				<Divider />
 				<TablePagination
 					component="div"
-					count={count}
-					onPageChange={noop}
-					onRowsPerPageChange={noop}
-					page={page}
-					rowsPerPage={rowsPerPage}
+					count={data?.meta.total || 0}
+					onPageChange={handleChangePage}
+					onRowsPerPageChange={handleChangeRowCount}
+					page={page - 1}
+					rowsPerPage={+limit}
 					rowsPerPageOptions={[5, 10, 25]}
 				/>
 			</Card>

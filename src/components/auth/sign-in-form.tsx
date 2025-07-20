@@ -4,6 +4,8 @@ import * as React from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
+import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -12,8 +14,6 @@ import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { EyeIcon } from "@phosphor-icons/react/dist/ssr/Eye";
-import { EyeSlashIcon } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 import { signIn } from "next-auth/react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -95,17 +95,15 @@ export function SignInForm(): React.JSX.Element {
 									{...field}
 									endAdornment={
 										showPassword ? (
-											<EyeIcon
+											<RemoveRedEyeOutlinedIcon
 												cursor="pointer"
-												fontSize="var(--icon-fontSize-md)"
 												onClick={(): void => {
 													setShowPassword(false);
 												}}
 											/>
 										) : (
-											<EyeSlashIcon
+											<VisibilityOffOutlinedIcon
 												cursor="pointer"
-												fontSize="var(--icon-fontSize-md)"
 												onClick={(): void => {
 													setShowPassword(true);
 												}}

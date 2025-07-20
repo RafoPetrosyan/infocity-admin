@@ -7,11 +7,17 @@ export const usersApi = createApi({
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
 		getUsers: builder.query<UsersResponse, any>({
-			query: (params) => ({
-				url: `/users`,
-				method: "GET",
-				params,
-			}),
+			query: (params) => {
+				const payload = { ...params };
+				if (payload.hasOwnProperty("search") && payload?.search?.length < 3) {
+					delete payload?.search;
+				}
+				return {
+					url: `/users`,
+					method: "GET",
+					params: payload,
+				};
+			},
 		}),
 	}),
 });

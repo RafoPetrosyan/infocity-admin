@@ -5,7 +5,6 @@ export const paths = {
 		overview: "/",
 		account: "/account",
 		users: "/users",
-		integrations: "/integrations",
 		settings: "/settings",
 	},
 	errors: { notFound: "/errors/not-found" },

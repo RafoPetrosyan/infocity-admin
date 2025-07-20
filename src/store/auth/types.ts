@@ -6,11 +6,17 @@ export interface User {
 	phone_number: string;
 	role: "user" | "admin" | "super-admin";
 	avatar: string;
+	createdAt: Date;
 }
 
 export interface UsersResponse {
 	data: User[];
-	count: number;
+	meta: {
+		page: number;
+		limit: number;
+		total: number;
+		pages: number;
+	};
 }
 
 export interface UsersState {
