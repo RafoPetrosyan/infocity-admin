@@ -6,6 +6,9 @@ export const paths = {
 		account: "/account",
 		users: "/users",
 		settings: "/settings",
+		emotions: "/emotions",
+		cities: "/cities",
+		categories: "/categories",
 	},
 	errors: { notFound: "/errors/not-found" },
 } as const;
