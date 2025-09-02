@@ -7,6 +7,7 @@ export const navItems = [
 	{ key: "emotions", title: "Emotions", href: paths.dashboard.emotions, icon: "emotions" },
 	{ key: "cities", title: "Cities", href: paths.dashboard.cities, icon: "cities" },
 	{ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "categories" },
+	{ key: "mobile-app", title: "Mobile App", href: paths.dashboard.mobileApp, icon: "mobileApp" },
 	// { key: "settings", title: "Settings", href: paths.dashboard.settings, icon: "gear-six" },
 	// { key: "account", title: "Account", href: paths.dashboard.account, icon: "user" },
 	// { key: "error", title: "Error", href: paths.errors.notFound, icon: "x-square" },

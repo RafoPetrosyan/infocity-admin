@@ -9,6 +9,7 @@ export const paths = {
 		emotions: "/emotions",
 		cities: "/cities",
 		categories: "/categories",
+		mobileApp: "/mobile-app",
 	},
 	errors: { notFound: "/errors/not-found" },
 } as const;

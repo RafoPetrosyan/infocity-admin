@@ -1,6 +1,7 @@
 import CategoryIcon from "@mui/icons-material/Category";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
+import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import { ChartPieIcon } from "@phosphor-icons/react/dist/ssr/ChartPie";
 import { GearSixIcon } from "@phosphor-icons/react/dist/ssr/GearSix";
 import { PlugsConnectedIcon } from "@phosphor-icons/react/dist/ssr/PlugsConnected";
@@ -18,4 +19,5 @@ export const navIcons = {
 	emotions: EmojiEmotionsIcon,
 	cities: LocationCityIcon,
 	categories: CategoryIcon,
+	mobileApp: PhoneAndroidIcon,
 } as Record<string, any>;
