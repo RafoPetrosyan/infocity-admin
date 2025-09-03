@@ -7,6 +7,8 @@ export interface User {
 	role: "user" | "admin" | "super-admin";
 	avatar: string;
 	createdAt: Date;
+	locale: "hy" | "en" | "ru";
+	email_verified: boolean;
 }
 
 export interface UsersResponse {

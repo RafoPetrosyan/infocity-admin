@@ -102,12 +102,16 @@ export function CustomersTable(): React.JSX.Element {
 
 			<Card>
 				<Box sx={{ overflowX: "auto" }}>
-					<Table sx={{ minWidth: "800px" }}>
+					<Table sx={{ minWidth: "1300px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell>Name</TableCell>
+								<TableCell>Avatar</TableCell>
+								<TableCell>First Name</TableCell>
+								<TableCell>Last Name</TableCell>
 								<TableCell>Email</TableCell>
 								<TableCell>Phone</TableCell>
+								<TableCell>Locale</TableCell>
+								<TableCell>Email Verified</TableCell>
 								<TableCell>Role</TableCell>
 								<TableCell>Signed Up</TableCell>
 							</TableRow>
@@ -117,13 +121,20 @@ export function CustomersTable(): React.JSX.Element {
 								{data?.data.map((row) => (
 									<TableRow hover key={row.id}>
 										<TableCell>
-											<Stack sx={{ alignItems: "center" }} direction="row" spacing={2}>
-												<Avatar src={row.avatar} />
-												<Typography variant="subtitle2">{`${row.first_name} ${row.last_name}`}</Typography>
-											</Stack>
+											<Avatar src={row.avatar} alt={`${row.first_name} ${row.last_name}`} />
 										</TableCell>
+										<TableCell>{row.first_name}</TableCell>
+										<TableCell>{row.last_name}</TableCell>
 										<TableCell>{row.email}</TableCell>
 										<TableCell>{row.phone_number || "-"}</TableCell>
+										<TableCell>{row.locale || "-"}</TableCell>
+										<TableCell>
+											{row.email_verified ? (
+												<Typography color="success.main">Yes</Typography>
+											) : (
+												<Typography color="error.main">No</Typography>
+											)}
+										</TableCell>
 										<TableCell>{row.role}</TableCell>
 										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
 									</TableRow>
