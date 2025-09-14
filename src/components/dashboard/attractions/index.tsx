@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { useLazyGetUsersQuery } from "@/store/users";
+import { useLazyGetAttractionsQuery } from "@/store/attractions";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import { Button } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -20,15 +23,14 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import dayjs from "dayjs";
 import { isEmpty } from "lodash";
 import { useDebouncedCallback } from "use-debounce";
 
-export function CustomersTable(): React.JSX.Element {
+export function Attractions(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(10);
 	const [search, setSearch] = useState("");
-	const [trigger, { data, isLoading, isError }] = useLazyGetUsersQuery();
+	const [trigger, { data, isLoading, isError }] = useLazyGetAttractionsQuery();
 
 	const handleChangePage = (_: any, page: number) => {
 		setPage(page + 1);
@@ -70,18 +72,20 @@ export function CustomersTable(): React.JSX.Element {
 
 	return (
 		<>
-			<Stack direction="row">
+			<Stack direction="row" sx={{ mb: 2 }}>
 				<Stack spacing={1} sx={{ flex: "1 1 auto" }}>
-					<Typography variant="h4">Customers</Typography>
+					<Typography variant="h4">Attractions</Typography>
 				</Stack>
+				<Button variant="contained">Create attraction</Button>
 			</Stack>
 
-			<Card sx={{ p: 2 }}>
+			{/* Search */}
+			<Card sx={{ p: 2, justifyContent: "space-between", flex: "1 1 auto", width: "100%" }}>
 				<OutlinedInput
 					value={search}
 					onChange={handleSearch}
 					fullWidth
-					placeholder="Search customer"
+					placeholder="Search attraction"
 					startAdornment={
 						<InputAdornment position="start">
 							<SearchOutlinedIcon />
@@ -101,43 +105,78 @@ export function CustomersTable(): React.JSX.Element {
 				/>
 			</Card>
 
+			{/* Table */}
 			<Card>
 				<Box sx={{ overflowX: "auto" }}>
 					<Table sx={{ minWidth: "1300px" }}>
 						<TableHead>
 							<TableRow>
-								<TableCell>Avatar</TableCell>
-								<TableCell>First Name</TableCell>
-								<TableCell>Last Name</TableCell>
-								<TableCell>Email</TableCell>
-								<TableCell>Phone</TableCell>
-								<TableCell>Locale</TableCell>
-								<TableCell>Email Verified</TableCell>
-								<TableCell>Role</TableCell>
-								<TableCell>Signed Up</TableCell>
+								<TableCell>Image</TableCell>
+								<TableCell>Name</TableCell>
+								<TableCell>Description</TableCell>
+								<TableCell>About</TableCell>
+								<TableCell>Slug</TableCell>
+								<TableCell>Location</TableCell>
+								<TableCell
+									sx={{
+										position: "sticky",
+										right: 0,
+										backgroundColor: "white",
+										zIndex: 2,
+									}}
+								>
+									Actions
+								</TableCell>
 							</TableRow>
 						</TableHead>
 						{!isEmpty(data?.data) && (
 							<TableBody>
-								{data?.data.map((row) => (
+								{data?.data.map((row: any) => (
 									<TableRow hover key={row.id}>
 										<TableCell>
-											<Avatar src={row.avatar} alt={`${row.first_name} ${row.last_name}`} />
+											<Avatar src={row.image} alt={row.translation?.name || "Attraction"} variant="rounded" />
 										</TableCell>
-										<TableCell>{row.first_name}</TableCell>
-										<TableCell>{row.last_name}</TableCell>
-										<TableCell>{row.email}</TableCell>
-										<TableCell>{row.phone_number || "-"}</TableCell>
-										<TableCell>{row.locale || "-"}</TableCell>
+										<TableCell>{row.translation?.name}</TableCell>
 										<TableCell>
-											{row.email_verified ? (
-												<Typography color="success.main">Yes</Typography>
-											) : (
-												<Typography color="error.main">No</Typography>
-											)}
+											{row.translation?.description?.length > 50
+												? `${row.translation?.description.substring(0, 100)}...`
+												: row.translation?.description}
 										</TableCell>
-										<TableCell>{row.role}</TableCell>
-										<TableCell>{dayjs(row.createdAt).format("MMM D, YYYY")}</TableCell>
+										<TableCell>
+											{row.translation?.about?.length > 50
+												? `${row.translation?.about.substring(0, 100)}...`
+												: row.translation?.about}
+										</TableCell>
+										<TableCell style={{ minWidth: 200 }}>{row.slug}</TableCell>
+										<TableCell style={{ minWidth: 150 }}>
+											<a
+												href={`https://www.google.com/maps?q=${row.latitude},${row.longitude}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												style={{ color: "#1976d2", textDecoration: "underline" }}
+											>
+												View Map
+											</a>
+										</TableCell>
+										<TableCell
+											style={{ minWidth: 100, display: "flex", height: "100%" }}
+											sx={{
+												position: "sticky",
+												right: 0,
+												backgroundColor: "white",
+												zIndex: 1,
+												borderLeft: "1px solid rgba(224, 224, 224, 1)",
+												bottom: 0,
+												height: "100%",
+											}}
+										>
+											<IconButton color="primary" onClick={() => console.log("Update attraction", row.id)}>
+												<EditIcon />
+											</IconButton>
+											<IconButton color="error" onClick={() => console.log("Delete attraction", row.id)}>
+												<DeleteIcon />
+											</IconButton>
+										</TableCell>
 									</TableRow>
 								))}
 							</TableBody>

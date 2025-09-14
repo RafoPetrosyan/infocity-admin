@@ -1,3 +1,4 @@
+import { attractionsApi } from "@/store/attractions";
 import { authApi } from "@/store/auth";
 import { categoriesApi } from "@/store/categories";
 import { citiesApi } from "@/store/cities";
@@ -18,6 +19,7 @@ export const makeStore = () => {
 			[citiesApi.reducerPath]: citiesApi.reducer,
 			[categoriesApi.reducerPath]: categoriesApi.reducer,
 			[mobileApi.reducerPath]: mobileApi.reducer,
+			[attractionsApi.reducerPath]: attractionsApi.reducer,
 		},
 		middleware: (getDefaultMiddleware) =>
 			getDefaultMiddleware().concat(
@@ -26,7 +28,8 @@ export const makeStore = () => {
 				emotionsApi.middleware,
 				citiesApi.middleware,
 				categoriesApi.middleware,
-				mobileApi.middleware
+				mobileApi.middleware,
+				attractionsApi.middleware
 			),
 	});
 };
