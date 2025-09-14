@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 import Stack from "@mui/material/Stack";
 
 import { config } from "@/config";
-import { Attractions } from "@/components/dashboard/attractions";
+import { AttractionForm } from "@/components/dashboard/attractions/form";
 
-export const metadata = { title: `Attractions | Dashboard | ${config.site.name}` } satisfies Metadata;
+export const metadata = { title: `Create attraction | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 export default function Page(): React.JSX.Element {
 	return (
 		<Stack spacing={3}>
-			<Attractions />
+			<AttractionForm />
 		</Stack>
 	);
 }

@@ -37,6 +37,7 @@
     "axios": "^1.11.0",
     "dayjs": "1.11.17",
     "lodash": "^4.17.21",
+    "mui-file-dropzone": "^4.0.2",
     "next": "15.5.2",
     "next-auth": "^4.24.11",
     "react": "19.1.1",

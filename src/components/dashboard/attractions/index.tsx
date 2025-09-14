@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useLazyGetAttractionsQuery } from "@/store/attractions";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -76,7 +77,9 @@ export function Attractions(): React.JSX.Element {
 				<Stack spacing={1} sx={{ flex: "1 1 auto" }}>
 					<Typography variant="h4">Attractions</Typography>
 				</Stack>
-				<Button variant="contained">Create attraction</Button>
+				<Link href={"/attractions/form"}>
+					<Button variant="contained">Create attraction</Button>
+				</Link>
 			</Stack>
 
 			{/* Search */}
