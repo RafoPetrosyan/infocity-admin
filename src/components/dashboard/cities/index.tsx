@@ -6,7 +6,7 @@ import {
 	useBulkUpdateCityOrderMutation,
 	useCreateCityMutation,
 	useDeleteCityMutation,
-	useLazyGetCitiesQuery,
+	useGetCitiesQuery,
 	useUpdateCityMutation,
 } from "@/store/cities";
 // 👈 RTK slice must have slug field too
@@ -44,13 +44,13 @@ type FormValues = {
 };
 
 export function Cities(): React.JSX.Element {
-	const [trigger, { data }] = useLazyGetCitiesQuery();
+	const { data = [], isFetching } = useGetCitiesQuery({});
 	const [createCity] = useCreateCityMutation();
 	const [updateCity] = useUpdateCityMutation();
 	const [deleteCity, { isLoading: isDeleting }] = useDeleteCityMutation();
 	const [bulkUpdateOrder] = useBulkUpdateCityOrderMutation();
+	const rows: any = data;
 
-	const [rows, setRows] = useState<any[]>([]);
 	const [open, setOpen] = useState(false);
 	const [editingCity, setEditingCity] = useState<any>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -63,16 +63,6 @@ export function Cities(): React.JSX.Element {
 			ru: "",
 		},
 	});
-
-	useEffect(() => {
-		trigger({});
-	}, []);
-
-	useEffect(() => {
-		if (isEmpty(data)) return;
-		// @ts-ignore
-		setRows(data);
-	}, [data]);
 
 	const getTranslation = (arr: any, lang: string) => arr.find((e: any) => e.language === lang)?.name || "";
 
@@ -118,7 +108,6 @@ export function Cities(): React.JSX.Element {
 				toast.success("City created");
 			}
 			handleClose();
-			trigger({});
 		} catch (err: any) {
 			toast.error(err?.data?.message || "Failed to save city");
 		}
@@ -130,9 +119,9 @@ export function Cities(): React.JSX.Element {
 		const reordered = Array.from(rows);
 		const [moved] = reordered.splice(result.source.index, 1);
 		reordered.splice(result.destination.index, 0, moved);
-		setRows(reordered);
 
 		const payload = reordered.map((item, index) => ({
+			// @ts-ignore
 			id: item.id,
 			order: index + 1,
 		}));
@@ -174,7 +163,7 @@ export function Cities(): React.JSX.Element {
 										</TableRow>
 									</TableHead>
 									<TableBody>
-										{rows.map((row, index) => (
+										{rows?.map((row: any, index: any) => (
 											<Draggable key={row.id} draggableId={row.id.toString()} index={index}>
 												{(provided, snapshot) => (
 													<TableRow
@@ -297,7 +286,6 @@ export function Cities(): React.JSX.Element {
 							if (deleteId) {
 								await deleteCity(deleteId).unwrap();
 								setDeleteId(null);
-								trigger({});
 							}
 						}}
 					>

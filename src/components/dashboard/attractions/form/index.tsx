@@ -66,9 +66,9 @@ export function AttractionForm(): React.JSX.Element {
 		register,
 		formState: { errors },
 	} = useForm<AttractionForm>({
-		defaultValues: {
-			social_links: [{ platform: "", url: "" }],
-		},
+		// defaultValues: {
+		// 	social_links: [{ platform: "", url: "" }],
+		// },
 	});
 
 	console.log(errors?.email);
@@ -84,8 +84,6 @@ export function AttractionForm(): React.JSX.Element {
 		const formData = new FormData();
 
 		formData.append("city_id", String(values.city_id));
-		formData.append("email", values.email);
-		formData.append("phone_number", values.phone_number);
 		formData.append("latitude", String(values.latitude));
 		formData.append("longitude", String(values.longitude));
 
@@ -93,7 +91,7 @@ export function AttractionForm(): React.JSX.Element {
 		formData.append("hy", JSON.stringify(values.hy));
 		formData.append("ru", JSON.stringify(values.ru));
 
-		formData.append("social_links", JSON.stringify(values.social_links));
+		// formData.append("social_links", JSON.stringify(values.social_links));
 
 		if (values.image?.[0]) {
 			formData.append("image", values.image[0]);
@@ -155,98 +153,107 @@ export function AttractionForm(): React.JSX.Element {
 						/>
 					</Grid>
 
-					{/* Email */}
+					{/* Lat/Lng */}
 					<Grid size={{ xs: 12, md: 6 }}>
 						<TextField
-							label="Email"
-							type="email"
+							label="Latitude"
+							type="number"
 							fullWidth
-							error={!!errors.email}
-							helperText={errors.email?.message}
-							{...register("email", { required: "Email is required" })}
+							error={!!errors.latitude}
+							helperText={errors.latitude?.message}
+							{...register("latitude", { required: "latitude is required" })}
+						/>
+					</Grid>
+					<Grid size={{ xs: 12, md: 6 }}>
+						<TextField
+							label="Longitude"
+							type="number"
+							fullWidth
+							error={!!errors.longitude}
+							helperText={errors.longitude?.message}
+							{...register("longitude", { required: "longitude is required" })}
 						/>
 					</Grid>
 
-					{/* Phone */}
-					<Grid size={{ xs: 12, md: 6 }}>
-						<TextField label="Phone Number" fullWidth {...register("phone_number", { required: true })} />
-					</Grid>
-
-					{/* Lat/Lng */}
-					<Grid size={{ xs: 12, md: 6 }}>
-						<TextField label="Latitude" type="number" fullWidth {...register("latitude", { required: true })} />
-					</Grid>
-					<Grid size={{ xs: 12, md: 6 }}>
-						<TextField label="Longitude" type="number" fullWidth {...register("longitude", { required: true })} />
-					</Grid>
-
 					{/* Translations */}
-					{(["en", "hy", "ru"] as const).map((lang) => (
-						<Grid key={lang} size={{ xs: 12 }}>
-							<Paper sx={{ p: 2, borderRadius: 3, mt: 1 }}>
-								<Typography variant="h6" mb={2}>
-									{lang.toUpperCase()} Translation
-								</Typography>
-								<Stack spacing={2}>
-									<TextField label="Name" fullWidth {...register(`${lang}.name`, { required: true })} />
-									<TextField
-										label="Description"
-										multiline
-										rows={3}
-										fullWidth
-										{...register(`${lang}.description`, { required: true })}
-									/>
-									<TextField
-										label="About"
-										multiline
-										rows={3}
-										fullWidth
-										{...register(`${lang}.about`, { required: true })}
-									/>
-								</Stack>
-							</Paper>
-						</Grid>
-					))}
+					{(["en", "hy", "ru"] as const).map((lang) => {
+						return (
+							<Grid key={lang} size={{ xs: 12 }}>
+								<Paper sx={{ p: 2, borderRadius: 3, mt: 1 }}>
+									<Typography variant="h6" mb={2}>
+										{lang.toUpperCase()} Translation
+									</Typography>
+									<Stack spacing={2}>
+										<TextField
+											label="Name"
+											fullWidth
+											error={!!errors?.[lang]?.name}
+											helperText={errors?.[lang]?.name?.message as string}
+											{...register(`${lang}.name`, { required: "name is required" })}
+										/>
+										<TextField
+											label="Description"
+											multiline
+											rows={2}
+											fullWidth
+											error={!!errors?.[lang]?.description}
+											helperText={errors?.[lang]?.description?.message as string}
+											{...register(`${lang}.description`, { required: "description is required" })}
+										/>
+										<TextField
+											label="About"
+											multiline
+											rows={4}
+											fullWidth
+											error={!!errors?.[lang]?.about}
+											helperText={errors?.[lang]?.about?.message as string}
+											{...register(`${lang}.about`, { required: "about is required" })}
+										/>
+									</Stack>
+								</Paper>
+							</Grid>
+						);
+					})}
 
-					{/* Social Links */}
-					<Grid size={{ xs: 12 }}>
-						<Typography variant="h6" mt={2}>
-							Social Links
-						</Typography>
-						{fields.map((field, index) => (
-							<Stack key={field.id} direction="row" spacing={2} mt={1}>
-								<Controller
-									control={control}
-									name={`social_links.${index}.platform`}
-									render={({ field }) => (
-										<Select {...field} displayEmpty sx={{ minWidth: 140 }}>
-											<MenuItem value="">
-												<em>Select platform</em>
-											</MenuItem>
-											{platforms.map((p) => (
-												<MenuItem key={p} value={p}>
-													{p.charAt(0).toUpperCase() + p.slice(1)}
-												</MenuItem>
-											))}
-										</Select>
-									)}
-								/>
-								<TextField
-									label="URL"
-									fullWidth
-									error={!!errors.social_links?.[index]?.url}
-									helperText={errors.social_links?.[index]?.url?.message}
-									{...register(`social_links.${index}.url`, { required: "URL is required" })}
-								/>
-								<IconButton onClick={() => remove(index)}>
-									<DeleteIcon />
-								</IconButton>
-							</Stack>
-						))}
-						<Button startIcon={<AddIcon />} sx={{ mt: 1 }} onClick={() => append({ platform: "", url: "" })}>
-							Add Link
-						</Button>
-					</Grid>
+					{/*/!* Social Links *!/*/}
+					{/*<Grid size={{ xs: 12 }}>*/}
+					{/*	<Typography variant="h6" mt={2}>*/}
+					{/*		Social Links*/}
+					{/*	</Typography>*/}
+					{/*	{fields.map((field, index) => (*/}
+					{/*		<Stack key={field.id} direction="row" spacing={2} mt={1}>*/}
+					{/*			<Controller*/}
+					{/*				control={control}*/}
+					{/*				name={`social_links.${index}.platform`}*/}
+					{/*				render={({ field }) => (*/}
+					{/*					<Select {...field} displayEmpty sx={{ minWidth: 140 }}>*/}
+					{/*						<MenuItem value="">*/}
+					{/*							<em>Select platform</em>*/}
+					{/*						</MenuItem>*/}
+					{/*						{platforms.map((p) => (*/}
+					{/*							<MenuItem key={p} value={p}>*/}
+					{/*								{p.charAt(0).toUpperCase() + p.slice(1)}*/}
+					{/*							</MenuItem>*/}
+					{/*						))}*/}
+					{/*					</Select>*/}
+					{/*				)}*/}
+					{/*			/>*/}
+					{/*			<TextField*/}
+					{/*				label="URL"*/}
+					{/*				fullWidth*/}
+					{/*				error={!!errors.social_links?.[index]?.url}*/}
+					{/*				helperText={errors.social_links?.[index]?.url?.message}*/}
+					{/*				{...register(`social_links.${index}.url`, { required: "URL is required" })}*/}
+					{/*			/>*/}
+					{/*			<IconButton onClick={() => remove(index)}>*/}
+					{/*				<DeleteIcon />*/}
+					{/*			</IconButton>*/}
+					{/*		</Stack>*/}
+					{/*	))}*/}
+					{/*	<Button startIcon={<AddIcon />} sx={{ mt: 1 }} onClick={() => append({ platform: "", url: "" })}>*/}
+					{/*		Add Link*/}
+					{/*	</Button>*/}
+					{/*</Grid>*/}
 
 					{/* Main Image */}
 					<Grid size={{ xs: 12 }}>

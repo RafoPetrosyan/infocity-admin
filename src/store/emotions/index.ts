@@ -5,6 +5,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 export const emotionsApi = createApi({
 	reducerPath: "emotionsApi",
 	baseQuery: axiosBaseQuery(),
+	tagTypes: ["Emotions"],
 	endpoints: (builder) => ({
 		getEmotions: builder.query<Emotion[], any>({
 			query: () => {
@@ -13,6 +14,7 @@ export const emotionsApi = createApi({
 					method: "GET",
 				};
 			},
+			providesTags: ["Emotions"],
 		}),
 
 		createEmotion: builder.mutation<any, any>({
@@ -21,6 +23,7 @@ export const emotionsApi = createApi({
 				method: "POST",
 				data,
 			}),
+			invalidatesTags: ["Emotions"],
 		}),
 
 		updateEmotion: builder.mutation<any, { id: number; [key: string]: any }>({
@@ -29,6 +32,7 @@ export const emotionsApi = createApi({
 				method: "PUT",
 				data: body,
 			}),
+			invalidatesTags: ["Emotions"],
 		}),
 
 		deleteEmotion: builder.mutation({
@@ -46,12 +50,13 @@ export const emotionsApi = createApi({
 					items: payload,
 				},
 			}),
+			invalidatesTags: ["Emotions"],
 		}),
 	}),
 });
 
 export const {
-	useLazyGetEmotionsQuery,
+	useGetEmotionsQuery,
 	useUpdateEmotionMutation,
 	useCreateEmotionMutation,
 	useDeleteEmotionMutation,

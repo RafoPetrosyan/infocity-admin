@@ -6,7 +6,7 @@ import {
 	useBulkUpdateCategoryOrderMutation,
 	useCreateCategoryMutation,
 	useDeleteCategoryMutation,
-	useLazyGetCategoriesQuery,
+	useGetCategoriesQuery,
 	useUpdateCategoryMutation,
 } from "@/store/categories";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
@@ -31,7 +31,6 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { isEmpty } from "lodash";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 
@@ -44,13 +43,13 @@ type FormValues = {
 };
 
 export function Categories(): React.JSX.Element {
-	const [trigger, { data }] = useLazyGetCategoriesQuery();
+	const { data = [] } = useGetCategoriesQuery({});
 	const [createCategory] = useCreateCategoryMutation();
 	const [updateCategory] = useUpdateCategoryMutation();
 	const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
 	const [bulkUpdateOrder] = useBulkUpdateCategoryOrderMutation();
 
-	const [rows, setRows] = useState<any[]>([]);
+	const rows: any[] = data;
 	const [open, setOpen] = useState(false);
 	const [editingCategory, setEditingCategory] = useState<any>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -67,16 +66,6 @@ export function Categories(): React.JSX.Element {
 	});
 
 	const watchImage = watch("image");
-
-	useEffect(() => {
-		trigger({});
-	}, []);
-
-	useEffect(() => {
-		if (!data) return;
-		// @ts-ignore
-		setRows(data);
-	}, [data]);
 
 	useEffect(() => {
 		if (watchImage && watchImage.length > 0) {
@@ -139,7 +128,6 @@ export function Categories(): React.JSX.Element {
 				toast.success("Category created");
 			}
 			handleClose();
-			trigger({});
 		} catch (err: any) {
 			toast.error(err?.data?.message || "Failed to save category");
 		}
@@ -151,7 +139,6 @@ export function Categories(): React.JSX.Element {
 		const reordered = Array.from(rows);
 		const [moved] = reordered.splice(result.source.index, 1);
 		reordered.splice(result.destination.index, 0, moved);
-		setRows(reordered);
 
 		const payload = reordered.map((item, index) => ({
 			id: item.id,
@@ -343,7 +330,6 @@ export function Categories(): React.JSX.Element {
 							if (deleteId) {
 								await deleteCategory(deleteId).unwrap();
 								setDeleteId(null);
-								trigger({});
 							}
 						}}
 					>

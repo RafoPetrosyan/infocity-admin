@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	useBulkUpdateEmotionOrderMutation,
 	useCreateEmotionMutation,
 	useDeleteEmotionMutation,
-	useLazyGetEmotionsQuery,
+	useGetEmotionsQuery,
 	useUpdateEmotionMutation,
 } from "@/store/emotions";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
@@ -44,13 +44,13 @@ type FormValues = {
 };
 
 export function EmotionsTable(): React.JSX.Element {
-	const [trigger, { data, isFetching }] = useLazyGetEmotionsQuery();
+	const { data = [], isFetching } = useGetEmotionsQuery({});
 	const [createEmotion] = useCreateEmotionMutation();
 	const [updateEmotion] = useUpdateEmotionMutation();
 	const [deleteEmotion, { isLoading: isDeleting }] = useDeleteEmotionMutation();
 	const [bulkUpdateOrder] = useBulkUpdateEmotionOrderMutation();
 
-	const [rows, setRows] = useState<any[]>([]);
+	const rows: any[] = data;
 	const [open, setOpen] = useState(false);
 	const [editingEmotion, setEditingEmotion] = useState<any>(null);
 	const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -64,17 +64,6 @@ export function EmotionsTable(): React.JSX.Element {
 			ru: "",
 		},
 	});
-
-	useEffect(() => {
-		trigger({});
-	}, []);
-
-	useEffect(() => {
-		if (isEmpty(data)) return;
-
-		// @ts-ignore
-		setRows(data);
-	}, [data]);
 
 	const getTranslation = (arr: any, lang: string) => arr.find((e: any) => e.language === lang)?.name || "";
 
@@ -123,7 +112,6 @@ export function EmotionsTable(): React.JSX.Element {
 				toast.success("Emotion created");
 			}
 			handleClose();
-			trigger({});
 		} catch (err: any) {
 			toast.error(err?.data?.message || "Failed to save emotion");
 		}
@@ -135,7 +123,6 @@ export function EmotionsTable(): React.JSX.Element {
 		const reordered = Array.from(rows);
 		const [moved] = reordered.splice(result.source.index, 1);
 		reordered.splice(result.destination.index, 0, moved);
-		setRows(reordered);
 
 		const payload = reordered.map((item, index) => ({
 			id: item.id,
@@ -317,7 +304,6 @@ export function EmotionsTable(): React.JSX.Element {
 							if (deleteId) {
 								await deleteEmotion(deleteId).unwrap();
 								setDeleteId(null);
-								trigger({});
 							}
 						}}
 					>

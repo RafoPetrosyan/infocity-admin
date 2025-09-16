@@ -5,6 +5,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 export const citiesApi = createApi({
 	reducerPath: "citiesApi",
 	baseQuery: axiosBaseQuery(),
+	tagTypes: ["Cities"],
 	endpoints: (builder) => ({
 		getCities: builder.query<Emotion[], any>({
 			query: () => {
@@ -13,6 +14,7 @@ export const citiesApi = createApi({
 					method: "GET",
 				};
 			},
+			providesTags: ["Cities"],
 		}),
 
 		createCity: builder.mutation<any, any>({
@@ -21,6 +23,7 @@ export const citiesApi = createApi({
 				method: "POST",
 				data,
 			}),
+			invalidatesTags: ["Cities"],
 		}),
 
 		updateCity: builder.mutation<any, { id: number; [key: string]: any }>({
@@ -29,6 +32,7 @@ export const citiesApi = createApi({
 				method: "PUT",
 				data: body,
 			}),
+			invalidatesTags: ["Cities"],
 		}),
 
 		deleteCity: builder.mutation({
@@ -36,6 +40,7 @@ export const citiesApi = createApi({
 				url: `/cities/${id}`,
 				method: "DELETE",
 			}),
+			invalidatesTags: ["Cities"],
 		}),
 
 		bulkUpdateCityOrder: builder.mutation<any, any>({
@@ -46,6 +51,7 @@ export const citiesApi = createApi({
 					items: payload,
 				},
 			}),
+			invalidatesTags: ["Cities"],
 		}),
 	}),
 });
@@ -54,6 +60,6 @@ export const {
 	useBulkUpdateCityOrderMutation,
 	useCreateCityMutation,
 	useDeleteCityMutation,
-	useLazyGetCitiesQuery,
+	useGetCitiesQuery,
 	useUpdateCityMutation,
 } = citiesApi;

@@ -5,6 +5,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 export const categoriesApi = createApi({
 	reducerPath: "categoriesApi",
 	baseQuery: axiosBaseQuery(),
+	tagTypes: ["Categories"],
 	endpoints: (builder) => ({
 		getCategories: builder.query<Emotion[], any>({
 			query: () => {
@@ -13,6 +14,7 @@ export const categoriesApi = createApi({
 					method: "GET",
 				};
 			},
+			providesTags: ["Categories"],
 		}),
 
 		createCategory: builder.mutation<any, any>({
@@ -21,6 +23,7 @@ export const categoriesApi = createApi({
 				method: "POST",
 				data,
 			}),
+			invalidatesTags: ["Categories"],
 		}),
 
 		updateCategory: builder.mutation<any, { id: number; [key: string]: any }>({
@@ -29,6 +32,7 @@ export const categoriesApi = createApi({
 				method: "PUT",
 				data: body,
 			}),
+			invalidatesTags: ["Categories"],
 		}),
 
 		deleteCategory: builder.mutation({
@@ -36,6 +40,7 @@ export const categoriesApi = createApi({
 				url: `/categories/${id}`,
 				method: "DELETE",
 			}),
+			invalidatesTags: ["Categories"],
 		}),
 
 		bulkUpdateCategoryOrder: builder.mutation<any, any>({
@@ -46,6 +51,7 @@ export const categoriesApi = createApi({
 					items: payload,
 				},
 			}),
+			invalidatesTags: ["Categories"],
 		}),
 	}),
 });
@@ -54,6 +60,6 @@ export const {
 	useBulkUpdateCategoryOrderMutation,
 	useCreateCategoryMutation,
 	useDeleteCategoryMutation,
-	useLazyGetCategoriesQuery,
+	useGetCategoriesQuery,
 	useUpdateCategoryMutation,
 } = categoriesApi;
