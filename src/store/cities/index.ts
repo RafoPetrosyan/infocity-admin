@@ -7,6 +7,16 @@ export const citiesApi = createApi({
 	baseQuery: axiosBaseQuery(),
 	tagTypes: ["Cities"],
 	endpoints: (builder) => ({
+		getCitiesList: builder.query<Emotion[], any>({
+			query: () => {
+				return {
+					url: `/cities`,
+					method: "GET",
+				};
+			},
+			providesTags: ["Cities"],
+		}),
+
 		getCities: builder.query<Emotion[], any>({
 			query: () => {
 				return {
@@ -62,4 +72,5 @@ export const {
 	useDeleteCityMutation,
 	useGetCitiesQuery,
 	useUpdateCityMutation,
+	useGetCitiesListQuery,
 } = citiesApi;

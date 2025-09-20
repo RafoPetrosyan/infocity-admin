@@ -19,7 +19,72 @@ export const attractionsApi = createApi({
 				};
 			},
 		}),
+
+		createAttraction: builder.mutation<any, any>({
+			query: (data) => ({
+				url: "/places/attraction",
+				method: "POST",
+				data,
+			}),
+		}),
+
+		updateAttraction: builder.mutation<any, any>({
+			query: (data) => ({
+				url: `/places/${data.id}`,
+				method: "PUT",
+				data: data.data,
+			}),
+		}),
+
+		getAttraction: builder.query<any, any>({
+			query: (params) => {
+				return {
+					url: `/places/${params.id}/detail`,
+					method: "GET",
+				};
+			},
+		}),
+
+		getGallery: builder.query<any, any>({
+			query: (params) => {
+				return {
+					url: `/places/${params.id}/gallery`,
+					method: "GET",
+				};
+			},
+		}),
+
+		uploadImages: builder.mutation<any, any>({
+			query: (data) => ({
+				url: `/places/${data.id}/gallery`,
+				method: "POST",
+				data: data.images,
+			}),
+		}),
+
+		deleteGallery: builder.mutation<any, any>({
+			query: (data) => ({
+				url: `/places/${data.place_id}/gallery/${data.id}`,
+				method: "DELETE",
+			}),
+		}),
+
+		deleteAttraction: builder.mutation<any, any>({
+			query: (data) => ({
+				url: `/places/${data.id}`,
+				method: "DELETE",
+			}),
+		}),
 	}),
 });
 
-export const { useLazyGetAttractionsQuery } = attractionsApi;
+export const {
+	useLazyGetAttractionsQuery,
+	useCreateAttractionMutation,
+	useLazyGetAttractionQuery,
+	useLazyGetGalleryQuery,
+	useUploadImagesMutation,
+	useDeleteGalleryMutation,
+	useUpdateAttractionMutation,
+	useDeleteAttractionMutation,
+} = attractionsApi;

@@ -3,12 +3,12 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useLazyGetAttractionsQuery } from "@/store/attractions";
+import { useDeleteAttractionMutation, useLazyGetAttractionsQuery } from "@/store/attractions";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { Button } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -25,13 +25,20 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
 import { useDebouncedCallback } from "use-debounce";
 
 export function Attractions(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const [limit, setLimit] = useState(10);
 	const [search, setSearch] = useState("");
+
 	const [trigger, { data, isLoading, isError }] = useLazyGetAttractionsQuery();
+	const [deleteAttraction, { isLoading: deleting }] = useDeleteAttractionMutation();
+
+	// Confirmation dialog state
+	const [openConfirm, setOpenConfirm] = useState(false);
+	const [selectedId, setSelectedId] = useState<number | null>(null);
 
 	const handleChangePage = (_: any, page: number) => {
 		setPage(page + 1);
@@ -70,6 +77,28 @@ export function Attractions(): React.JSX.Element {
 	useEffect(() => {
 		trigger({ page, limit });
 	}, []);
+
+	// Open confirmation popup
+	const handleDeleteClick = (id: number) => {
+		setSelectedId(id);
+		setOpenConfirm(true);
+	};
+
+	// Confirm delete
+	const handleConfirmDelete = async () => {
+		if (!selectedId) return;
+		try {
+			await deleteAttraction({ id: selectedId }).unwrap();
+			setOpenConfirm(false);
+			setSelectedId(null);
+			// Refresh list
+			trigger({ page, limit, search });
+			toast.success("Attraction deleted successfully");
+		} catch (error: any) {
+			toast.error(error?.data?.message || "Error");
+			console.log("Delete failed:", error);
+		}
+	};
 
 	return (
 		<>
@@ -173,10 +202,12 @@ export function Attractions(): React.JSX.Element {
 												height: "100%",
 											}}
 										>
-											<IconButton color="primary" onClick={() => console.log("Update attraction", row.id)}>
-												<EditIcon />
-											</IconButton>
-											<IconButton color="error" onClick={() => console.log("Delete attraction", row.id)}>
+											<Link href={`/attractions/form/${row.id}`}>
+												<IconButton color="primary">
+													<EditIcon />
+												</IconButton>
+											</Link>
+											<IconButton color="error" onClick={() => handleDeleteClick(row.id)}>
 												<DeleteIcon />
 											</IconButton>
 										</TableCell>
@@ -197,6 +228,22 @@ export function Attractions(): React.JSX.Element {
 					rowsPerPageOptions={[5, 10, 25]}
 				/>
 			</Card>
+
+			{/* Delete confirmation dialog */}
+			<Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+				<DialogTitle>Delete Attraction</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						Are you sure you want to delete this attraction? This action cannot be undone.
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+					<Button onClick={handleConfirmDelete} color="error" disabled={deleting}>
+						{deleting ? "Deleting..." : "Delete"}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 }

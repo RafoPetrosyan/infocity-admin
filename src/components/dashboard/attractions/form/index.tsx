@@ -1,27 +1,24 @@
 "use client";
 
-import React from "react";
-// import { useCreateAttractionMutation } from "@/store/attractions";
-import AddIcon from "@mui/icons-material/Add";
+import React, { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+	useCreateAttractionMutation,
+	useDeleteGalleryMutation,
+	useLazyGetAttractionQuery,
+	useLazyGetGalleryQuery,
+	useUpdateAttractionMutation,
+	useUploadImagesMutation,
+} from "@/store/attractions";
+import { useGetCitiesListQuery } from "@/store/cities";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-	Autocomplete,
-	Box,
-	Button,
-	Card,
-	IconButton,
-	InputLabel,
-	MenuItem,
-	Paper,
-	Select,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material";
+import { Autocomplete, Box, Button, Card, IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import { isEmpty } from "lodash";
 import { DropzoneArea } from "mui-file-dropzone";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 type Translation = {
 	name: string;
@@ -34,7 +31,7 @@ type SocialLink = {
 	url: string;
 };
 
-type AttractionForm = {
+type AttractionFormType = {
 	city_id: number;
 	category_id: number;
 	email: string;
@@ -49,86 +46,126 @@ type AttractionForm = {
 	gallery: File[];
 };
 
-// Example city list (replace with real data from your API)
-const cities = [
-	{ id: 1, name: "Yerevan" },
-	{ id: 2, name: "Gyumri" },
-	{ id: 3, name: "Vanadzor" },
-];
-
-// Social platform options
-const platforms = ["facebook", "instagram", "tiktok", "website"];
-
 export function AttractionForm(): React.JSX.Element {
+	const route = useRouter();
+	const params = useParams();
+	const { data: citiesData } = useGetCitiesListQuery({});
+	const [createAttraction, { isLoading }] = useCreateAttractionMutation();
+	const [updateAttraction, { isLoading: updateIsLoading }] = useUpdateAttractionMutation();
+	const [uploadImages, { isLoading: uploadLoading }] = useUploadImagesMutation();
+	const [deleteGallery] = useDeleteGalleryMutation();
+	const [getAttractionById, { data: attraction }] = useLazyGetAttractionQuery();
+	const [getGallery, { data: gallery }] = useLazyGetGalleryQuery();
 	const {
 		control,
 		handleSubmit,
-		register,
 		formState: { errors },
-	} = useForm<AttractionForm>({
-		// defaultValues: {
-		// 	social_links: [{ platform: "", url: "" }],
-		// },
+		reset,
+	} = useForm<any>({
+		defaultValues: {
+			city_id: "",
+			latitude: "",
+			longitude: "",
+			en: { name: "", description: "", about: "" },
+			hy: { name: "", description: "", about: "" },
+			ru: { name: "", description: "", about: "" },
+		},
 	});
 
-	console.log(errors?.email);
+	console.log(gallery, "gallery");
 
-	const { fields, append, remove } = useFieldArray({
-		control,
-		name: "social_links",
-	});
-
-	// const [createAttraction, { isLoading }] = useCreateAttractionMutation();
-
-	const onSubmit = async (values: AttractionForm) => {
+	const onSubmit = async (values: AttractionFormType) => {
 		const formData = new FormData();
-
 		formData.append("city_id", String(values.city_id));
 		formData.append("latitude", String(values.latitude));
 		formData.append("longitude", String(values.longitude));
-
 		formData.append("en", JSON.stringify(values.en));
 		formData.append("hy", JSON.stringify(values.hy));
 		formData.append("ru", JSON.stringify(values.ru));
-
-		// formData.append("social_links", JSON.stringify(values.social_links));
 
 		if (values.image?.[0]) {
 			formData.append("image", values.image[0]);
 		}
 
-		if (values.gallery?.length) {
-			values.gallery.forEach((file) => {
-				formData.append("gallery", file);
-			});
-		}
+		try {
+			let placeId = params.id || "";
+			if (params.id) {
+				await updateAttraction({ data: formData, id: params.id }).unwrap();
+			} else {
+				const response = await createAttraction(formData).unwrap();
+				placeId = response.place.id;
+			}
 
-		// await createAttraction(formData);
+			// upload gallery images if any new ones
+			if (values.gallery?.length) {
+				const galleryFormData = new FormData();
+				values.gallery.forEach((file) => {
+					galleryFormData.append("images", file);
+				});
+				await uploadImages({ images: galleryFormData, id: placeId }).unwrap();
+			}
+
+			toast.success(`Attraction successfully ${params.id ? "updated" : "created"}`);
+			route.back();
+		} catch (err: any) {
+			if (typeof err?.data?.message === "object") {
+				Object.values(err?.data?.message).forEach((value: any) => toast.error(value as string));
+			} else {
+				toast.error(err?.data?.message || "Error");
+			}
+		}
+	};
+
+	// load attraction on edit
+	useEffect(() => {
+		if (params.id) {
+			getAttractionById({ id: params.id });
+			getGallery({ id: params.id });
+		}
+	}, []);
+
+	// set form values when loaded
+	useEffect(() => {
+		if (isEmpty(attraction)) return;
+		const hy = attraction.translations.find((e: any) => e.language === "hy");
+		const en = attraction.translations.find((e: any) => e.language === "en");
+		const ru = attraction.translations.find((e: any) => e.language === "ru");
+
+		reset({
+			city_id: attraction.city_id,
+			latitude: attraction.latitude,
+			longitude: attraction.longitude,
+			hy: { name: hy.name, description: hy.description, about: hy.about },
+			en: { name: en.name, description: en.description, about: en.about },
+			ru: { name: ru.name, description: ru.description, about: ru.about },
+		});
+	}, [attraction]);
+
+	const handleDeleteGalleryImage = async (id: string) => {
+		try {
+			await deleteGallery({ id, place_id: params.id }).unwrap();
+			toast.success("Image deleted");
+			getGallery({ id: params.id });
+		} catch {
+			toast.error("Failed to delete image");
+		}
 	};
 
 	return (
-		<Card
-			sx={{
-				p: 1,
-				mx: "auto",
-				boxShadow: 3,
-				borderRadius: 4,
-				mt: 1,
-			}}
-		>
+		<Card sx={{ p: 1, mx: "auto", boxShadow: 3, borderRadius: 4, mt: 1 }}>
 			{/* Back button */}
 			<Box display="flex" alignItems="center" mb={2}>
 				<Button startIcon={<ArrowBackIcon />} onClick={() => window.history.back()}>
 					Back
 				</Button>
 				<Typography variant="h5" sx={{ flex: 1, textAlign: "center" }}>
-					Create Attraction
+					{params.id ? "Update attraction" : "Create attraction"}
 				</Typography>
 			</Box>
 
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<Grid container spacing={3}>
-					{/* City Autocomplete */}
+					{/* City */}
 					<Grid size={{ xs: 12, md: 6 }}>
 						<Controller
 							control={control}
@@ -136,8 +173,9 @@ export function AttractionForm(): React.JSX.Element {
 							rules={{ required: "City is required" }}
 							render={({ field }) => (
 								<Autocomplete
-									options={cities}
-									getOptionLabel={(option) => option.name}
+									options={citiesData as any}
+									value={(citiesData || []).find((c: any) => c.id === field.value) || null}
+									getOptionLabel={(option: any) => option.name}
 									onChange={(_, val) => field.onChange(val?.id ?? "")}
 									renderInput={(params) => (
 										<TextField
@@ -155,110 +193,112 @@ export function AttractionForm(): React.JSX.Element {
 
 					{/* Lat/Lng */}
 					<Grid size={{ xs: 12, md: 6 }}>
-						<TextField
-							label="Latitude"
-							type="number"
-							fullWidth
-							error={!!errors.latitude}
-							helperText={errors.latitude?.message}
-							{...register("latitude", { required: "latitude is required" })}
+						<Controller
+							name="latitude"
+							control={control}
+							rules={{ required: "latitude is required" }}
+							render={({ field, fieldState }) => (
+								<TextField
+									{...field}
+									label="Latitude"
+									fullWidth
+									error={!!fieldState.error}
+									helperText={fieldState.error?.message}
+								/>
+							)}
 						/>
 					</Grid>
+
 					<Grid size={{ xs: 12, md: 6 }}>
-						<TextField
-							label="Longitude"
-							type="number"
-							fullWidth
-							error={!!errors.longitude}
-							helperText={errors.longitude?.message}
-							{...register("longitude", { required: "longitude is required" })}
+						<Controller
+							name="longitude"
+							control={control}
+							rules={{ required: "longitude is required" }}
+							render={({ field, fieldState }) => (
+								<TextField
+									{...field}
+									label="Longitude"
+									fullWidth
+									error={!!fieldState.error}
+									helperText={fieldState.error?.message}
+								/>
+							)}
 						/>
 					</Grid>
 
 					{/* Translations */}
-					{(["en", "hy", "ru"] as const).map((lang) => {
-						return (
-							<Grid key={lang} size={{ xs: 12 }}>
-								<Paper sx={{ p: 2, borderRadius: 3, mt: 1 }}>
-									<Typography variant="h6" mb={2}>
-										{lang.toUpperCase()} Translation
-									</Typography>
-									<Stack spacing={2}>
-										<TextField
-											label="Name"
-											fullWidth
-											error={!!errors?.[lang]?.name}
-											helperText={errors?.[lang]?.name?.message as string}
-											{...register(`${lang}.name`, { required: "name is required" })}
-										/>
-										<TextField
-											label="Description"
-											multiline
-											rows={2}
-											fullWidth
-											error={!!errors?.[lang]?.description}
-											helperText={errors?.[lang]?.description?.message as string}
-											{...register(`${lang}.description`, { required: "description is required" })}
-										/>
-										<TextField
-											label="About"
-											multiline
-											rows={4}
-											fullWidth
-											error={!!errors?.[lang]?.about}
-											helperText={errors?.[lang]?.about?.message as string}
-											{...register(`${lang}.about`, { required: "about is required" })}
-										/>
-									</Stack>
-								</Paper>
-							</Grid>
-						);
-					})}
+					{(["en", "hy", "ru"] as const).map((lang) => (
+						<Grid key={lang} size={{ xs: 12 }}>
+							<Paper sx={{ p: 2, borderRadius: 3, mt: 1 }}>
+								<Typography variant="h6" mb={2}>
+									{lang.toUpperCase()} Translation
+								</Typography>
+								<Stack spacing={2}>
+									<Controller
+										name={`${lang}.name`}
+										control={control}
+										rules={{ required: "Name is required" }}
+										render={({ field, fieldState }) => (
+											<TextField
+												{...field}
+												label="Name"
+												fullWidth
+												error={!!fieldState.error}
+												helperText={fieldState.error?.message}
+											/>
+										)}
+									/>
+									<Controller
+										name={`${lang}.description`}
+										control={control}
+										rules={{ required: "Description is required" }}
+										render={({ field, fieldState }) => (
+											<TextField
+												{...field}
+												label="Description"
+												fullWidth
+												multiline
+												rows={2}
+												error={!!fieldState.error}
+												helperText={fieldState.error?.message}
+											/>
+										)}
+									/>
+									<Controller
+										name={`${lang}.about`}
+										control={control}
+										rules={{ required: "About is required" }}
+										render={({ field, fieldState }) => (
+											<TextField
+												{...field}
+												label="About"
+												fullWidth
+												multiline
+												rows={4}
+												error={!!fieldState.error}
+												helperText={fieldState.error?.message}
+											/>
+										)}
+									/>
+								</Stack>
+							</Paper>
+						</Grid>
+					))}
 
-					{/*/!* Social Links *!/*/}
-					{/*<Grid size={{ xs: 12 }}>*/}
-					{/*	<Typography variant="h6" mt={2}>*/}
-					{/*		Social Links*/}
-					{/*	</Typography>*/}
-					{/*	{fields.map((field, index) => (*/}
-					{/*		<Stack key={field.id} direction="row" spacing={2} mt={1}>*/}
-					{/*			<Controller*/}
-					{/*				control={control}*/}
-					{/*				name={`social_links.${index}.platform`}*/}
-					{/*				render={({ field }) => (*/}
-					{/*					<Select {...field} displayEmpty sx={{ minWidth: 140 }}>*/}
-					{/*						<MenuItem value="">*/}
-					{/*							<em>Select platform</em>*/}
-					{/*						</MenuItem>*/}
-					{/*						{platforms.map((p) => (*/}
-					{/*							<MenuItem key={p} value={p}>*/}
-					{/*								{p.charAt(0).toUpperCase() + p.slice(1)}*/}
-					{/*							</MenuItem>*/}
-					{/*						))}*/}
-					{/*					</Select>*/}
-					{/*				)}*/}
-					{/*			/>*/}
-					{/*			<TextField*/}
-					{/*				label="URL"*/}
-					{/*				fullWidth*/}
-					{/*				error={!!errors.social_links?.[index]?.url}*/}
-					{/*				helperText={errors.social_links?.[index]?.url?.message}*/}
-					{/*				{...register(`social_links.${index}.url`, { required: "URL is required" })}*/}
-					{/*			/>*/}
-					{/*			<IconButton onClick={() => remove(index)}>*/}
-					{/*				<DeleteIcon />*/}
-					{/*			</IconButton>*/}
-					{/*		</Stack>*/}
-					{/*	))}*/}
-					{/*	<Button startIcon={<AddIcon />} sx={{ mt: 1 }} onClick={() => append({ platform: "", url: "" })}>*/}
-					{/*		Add Link*/}
-					{/*	</Button>*/}
-					{/*</Grid>*/}
+					{/* Existing main image */}
+					{params.id && attraction?.image && (
+						<Grid size={{ xs: 12 }}>
+							<Typography variant="h6" mt={2}>
+								Current Main Image
+							</Typography>
+							<img src={attraction.image} alt="Main" style={{ width: 200, borderRadius: 8 }} />
+						</Grid>
+					)}
 
-					{/* Main Image */}
+					{/* New main image */}
 					<Grid size={{ xs: 12 }}>
 						<Typography variant="h6" mt={2}>
-							Main Image
+							Upload New Main Image
 						</Typography>
 						<Controller
 							control={control}
@@ -274,10 +314,38 @@ export function AttractionForm(): React.JSX.Element {
 						/>
 					</Grid>
 
-					{/* Gallery */}
+					{/* Existing gallery */}
+					{params.id && gallery?.gallery?.length > 0 && (
+						<Grid size={{ xs: 12 }}>
+							<Typography variant="h6" mt={2}>
+								Current Gallery
+							</Typography>
+							<Stack direction="row" spacing={2} flexWrap="wrap">
+								{gallery.gallery.map((g: any) => (
+									<Box key={g.id} position="relative">
+										<img
+											src={g.thumbnail}
+											alt=""
+											style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 6 }}
+										/>
+										<IconButton
+											size="small"
+											color="error"
+											onClick={() => handleDeleteGalleryImage(g.id)}
+											sx={{ position: "absolute", top: -8, right: -8, bgcolor: "white" }}
+										>
+											<DeleteIcon fontSize="small" />
+										</IconButton>
+									</Box>
+								))}
+							</Stack>
+						</Grid>
+					)}
+
+					{/* New gallery images */}
 					<Grid size={{ xs: 12 }}>
 						<Typography variant="h6" mt={2}>
-							Gallery (max 10)
+							Upload New Gallery Images (max 10)
 						</Typography>
 						<Controller
 							control={control}
@@ -295,9 +363,14 @@ export function AttractionForm(): React.JSX.Element {
 
 					{/* Submit */}
 					<Grid size={{ xs: 12 }}>
-						<Button type="submit" variant="contained" size="large" fullWidth>
-							Create Attraction
-							{/*{isLoading ? "Saving..." : "Create Attraction"}*/}
+						<Button
+							type="submit"
+							variant="contained"
+							size="large"
+							fullWidth
+							disabled={isLoading || uploadLoading || updateIsLoading}
+						>
+							{params.id ? "Update Attraction" : "Create Attraction"}
 						</Button>
 					</Grid>
 				</Grid>
