@@ -220,7 +220,7 @@ export function Attractions(): React.JSX.Element {
 				<Divider />
 				<TablePagination
 					component="div"
-					count={data?.meta.total || 0}
+					count={data?.meta?.total || 0}
 					onPageChange={handleChangePage}
 					onRowsPerPageChange={handleChangeRowCount}
 					page={page - 1}
