@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
@@ -30,7 +29,6 @@ type Values = zod.infer<typeof schema>;
 
 export function SignInForm(): React.JSX.Element {
 	const router = useRouter();
-	const inputRef = useRef(null);
 
 	const { checkSession } = useUser();
 
@@ -63,6 +61,7 @@ export function SignInForm(): React.JSX.Element {
 			}
 
 			router.replace("/");
+			router.refresh();
 		},
 		[checkSession, router, setError]
 	);
@@ -118,7 +117,7 @@ export function SignInForm(): React.JSX.Element {
 						)}
 					/>
 					{errors.root ? <Alert color="error">{errors.root.message}</Alert> : null}
-					<Button disabled={isPending} type="submit" variant="contained">
+					<Button disabled={isPending} type="submit" variant="contained" loading={isPending}>
 						Sign in
 					</Button>
 				</Stack>
