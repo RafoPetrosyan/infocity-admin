@@ -10,6 +10,7 @@ export const paths = {
 		cities: "/cities",
 		categories: "/categories",
 		attractions: "/attractions",
+		eventCategories: "/event-categories",
 		mobileApp: "/mobile-app",
 	},
 	errors: { notFound: "/errors/not-found" },

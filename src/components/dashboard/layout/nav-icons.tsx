@@ -2,6 +2,7 @@ import AreaChartIcon from "@mui/icons-material/AreaChart";
 import CategoryIcon from "@mui/icons-material/Category";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import GroupIcon from "@mui/icons-material/Group";
+import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
 import PersonIcon from "@mui/icons-material/Person";
@@ -16,4 +17,5 @@ export const navIcons = {
 	categories: CategoryIcon,
 	mobileApp: PhoneAndroidIcon,
 	attractions: NaturePeopleIcon,
+	eventCategories: LocalActivityIcon,
 } as Record<string, any>;
