@@ -6,6 +6,7 @@ import { emotionsApi } from "@/store/emotions";
 import { eventCategoriesApi } from "@/store/eventCategories";
 import { mobileApi } from "@/store/mobile";
 import { usersApi } from "@/store/users";
+import { placesApi } from "@/store/places";
 import { configureStore } from "@reduxjs/toolkit";
 
 import auth from "./auth/reducer";
@@ -22,6 +23,7 @@ export const makeStore = () => {
 			[mobileApi.reducerPath]: mobileApi.reducer,
 			[attractionsApi.reducerPath]: attractionsApi.reducer,
 			[eventCategoriesApi.reducerPath]: eventCategoriesApi.reducer,
+			[placesApi.reducerPath]: placesApi.reducer,
 		},
 		middleware: (getDefaultMiddleware) =>
 			getDefaultMiddleware().concat(
@@ -32,7 +34,8 @@ export const makeStore = () => {
 				categoriesApi.middleware,
 				mobileApi.middleware,
 				attractionsApi.middleware,
-				eventCategoriesApi.middleware
+				eventCategoriesApi.middleware,
+				placesApi.middleware
 			),
 	});
 };

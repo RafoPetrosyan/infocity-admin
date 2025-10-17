@@ -10,6 +10,7 @@ export const paths = {
 		cities: "/cities",
 		categories: "/categories",
 		attractions: "/attractions",
+		places: "/places",
 		eventCategories: "/event-categories",
 		mobileApp: "/mobile-app",
 	},

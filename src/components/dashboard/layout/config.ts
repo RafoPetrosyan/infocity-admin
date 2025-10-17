@@ -7,6 +7,7 @@ export const navItems = [
 	{ key: "emotions", title: "Emotions", href: paths.dashboard.emotions, icon: "emotions" },
 	{ key: "cities", title: "Cities", href: paths.dashboard.cities, icon: "cities" },
 	{ key: "categories", title: "Categories", href: paths.dashboard.categories, icon: "categories" },
+	{ key: "places", title: "Places", href: paths.dashboard.places, icon: "places" },
 	{ key: "attractions", title: "Attractions", href: paths.dashboard.attractions, icon: "attractions" },
 	{
 		key: "event-categories",

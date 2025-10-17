@@ -7,6 +7,7 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import NaturePeopleIcon from "@mui/icons-material/NaturePeople";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
+import EditLocationIcon from '@mui/icons-material/EditLocation';
 
 export const navIcons = {
 	"chart-pie": AreaChartIcon,
@@ -18,4 +19,5 @@ export const navIcons = {
 	mobileApp: PhoneAndroidIcon,
 	attractions: NaturePeopleIcon,
 	eventCategories: LocalActivityIcon,
+	places: EditLocationIcon,
 } as Record<string, any>;
