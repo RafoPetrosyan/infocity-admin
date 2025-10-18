@@ -6,29 +6,21 @@ export const placesApi = createApi({
 	reducerPath: "placesApi",
 	baseQuery: axiosBaseQuery(),
 	endpoints: (builder) => ({
-		getAttractions: builder.query<UsersResponse, any>({
+		getPlaces: builder.query<UsersResponse, any>({
 			query: (params) => {
 				const payload = { ...params };
 				if (payload.hasOwnProperty("search") && payload?.search?.length < 3) {
 					delete payload?.search;
 				}
 				return {
-					url: `/places/attractions`,
+					url: `/places/admin`,
 					method: "GET",
 					params: payload,
 				};
 			},
 		}),
 
-		createAttraction: builder.mutation<any, any>({
-			query: (data) => ({
-				url: "/places/attraction",
-				method: "POST",
-				data,
-			}),
-		}),
-
-		updateAttraction: builder.mutation<any, any>({
+		updatePlace: builder.mutation<any, any>({
 			query: (data) => ({
 				url: `/places/${data.id}`,
 				method: "PUT",
@@ -36,7 +28,7 @@ export const placesApi = createApi({
 			}),
 		}),
 
-		getAttraction: builder.query<any, any>({
+		getPlace: builder.query<any, any>({
 			query: (params) => {
 				return {
 					url: `/places/${params.id}/detail`,
@@ -69,7 +61,7 @@ export const placesApi = createApi({
 			}),
 		}),
 
-		deleteAttraction: builder.mutation<any, any>({
+		deletePlace: builder.mutation<any, any>({
 			query: (data) => ({
 				url: `/places/${data.id}`,
 				method: "DELETE",
@@ -79,12 +71,11 @@ export const placesApi = createApi({
 });
 
 export const {
-	useLazyGetAttractionsQuery,
-	useCreateAttractionMutation,
-	useLazyGetAttractionQuery,
+	useLazyGetPlaceQuery,
+	useLazyGetPlacesQuery,
 	useLazyGetGalleryQuery,
 	useUploadImagesMutation,
 	useDeleteGalleryMutation,
-	useUpdateAttractionMutation,
-	useDeleteAttractionMutation,
+	useUpdatePlaceMutation,
+	useDeletePlaceMutation,
 } = placesApi;

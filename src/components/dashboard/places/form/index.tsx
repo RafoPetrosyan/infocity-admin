@@ -2,15 +2,14 @@
 
 import React, { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-	useCreateAttractionMutation,
-	useDeleteGalleryMutation,
-	useLazyGetAttractionQuery,
-	useLazyGetGalleryQuery,
-	useUpdateAttractionMutation,
-	useUploadImagesMutation,
-} from "@/store/attractions";
 import { useGetCitiesListQuery } from "@/store/cities";
+import {
+	useDeleteGalleryMutation,
+	useLazyGetGalleryQuery,
+	useLazyGetPlaceQuery,
+	useUpdatePlaceMutation,
+	useUploadImagesMutation,
+} from "@/store/places";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Autocomplete, Box, Button, Card, IconButton, Paper, Stack, TextField, Typography } from "@mui/material";
@@ -50,11 +49,10 @@ export function PlacesForm(): React.JSX.Element {
 	const route = useRouter();
 	const params = useParams();
 	const { data: citiesData } = useGetCitiesListQuery({});
-	const [createAttraction, { isLoading }] = useCreateAttractionMutation();
-	const [updateAttraction, { isLoading: updateIsLoading }] = useUpdateAttractionMutation();
+	const [updatePlace, { isLoading: updateIsLoading }] = useUpdatePlaceMutation();
 	const [uploadImages, { isLoading: uploadLoading }] = useUploadImagesMutation();
 	const [deleteGallery] = useDeleteGalleryMutation();
-	const [getAttractionById, { data: attraction }] = useLazyGetAttractionQuery();
+	const [getPlaceById, { data: place }] = useLazyGetPlaceQuery();
 	const [getGallery, { data: gallery }] = useLazyGetGalleryQuery();
 	const {
 		control,
@@ -90,10 +88,10 @@ export function PlacesForm(): React.JSX.Element {
 		try {
 			let placeId = params.id || "";
 			if (params.id) {
-				await updateAttraction({ data: formData, id: params.id }).unwrap();
+				await updatePlace({ data: formData, id: params.id }).unwrap();
 			} else {
-				const response = await createAttraction(formData).unwrap();
-				placeId = response.place.id;
+				// const response = await createAttraction(formData).unwrap();
+				// placeId = response.place.id;
 			}
 
 			// upload gallery images if any new ones
@@ -105,7 +103,7 @@ export function PlacesForm(): React.JSX.Element {
 				await uploadImages({ images: galleryFormData, id: placeId }).unwrap();
 			}
 
-			toast.success(`Attraction successfully ${params.id ? "updated" : "created"}`);
+			toast.success(`Place successfully ${params.id ? "updated" : "created"}`);
 			route.back();
 		} catch (err: any) {
 			if (typeof err?.data?.message === "object") {
@@ -119,27 +117,27 @@ export function PlacesForm(): React.JSX.Element {
 	// load attraction on edit
 	useEffect(() => {
 		if (params.id) {
-			getAttractionById({ id: params.id });
+			getPlaceById({ id: params.id });
 			getGallery({ id: params.id });
 		}
 	}, []);
 
 	// set form values when loaded
 	useEffect(() => {
-		if (isEmpty(attraction)) return;
-		const hy = attraction.translations.find((e: any) => e.language === "hy");
-		const en = attraction.translations.find((e: any) => e.language === "en");
-		const ru = attraction.translations.find((e: any) => e.language === "ru");
+		if (isEmpty(place)) return;
+		const hy = place.translations.find((e: any) => e.language === "hy");
+		const en = place.translations.find((e: any) => e.language === "en");
+		const ru = place.translations.find((e: any) => e.language === "ru");
 
 		reset({
-			city_id: attraction.city_id,
-			latitude: attraction.latitude,
-			longitude: attraction.longitude,
+			city_id: place.city_id,
+			latitude: place.latitude,
+			longitude: place.longitude,
 			hy: { name: hy.name, description: hy.description, about: hy.about },
 			en: { name: en.name, description: en.description, about: en.about },
 			ru: { name: ru.name, description: ru.description, about: ru.about },
 		});
-	}, [attraction]);
+	}, [place]);
 
 	const handleDeleteGalleryImage = async (id: string) => {
 		try {
@@ -159,7 +157,7 @@ export function PlacesForm(): React.JSX.Element {
 					Back
 				</Button>
 				<Typography variant="h5" sx={{ flex: 1, textAlign: "center" }}>
-					{params.id ? "Update attraction" : "Create attraction"}
+					{params.id ? "Update place" : "Create place"}
 				</Typography>
 			</Box>
 
@@ -286,12 +284,12 @@ export function PlacesForm(): React.JSX.Element {
 					))}
 
 					{/* Existing main image */}
-					{params.id && attraction?.image && (
+					{params.id && place?.image && (
 						<Grid size={{ xs: 12 }}>
 							<Typography variant="h6" mt={2}>
 								Current Main Image
 							</Typography>
-							<img src={attraction.image} alt="Main" style={{ width: 200, borderRadius: 8 }} />
+							<img src={place.image} alt="Main" style={{ width: 200, borderRadius: 8 }} />
 						</Grid>
 					)}
 
@@ -368,9 +366,9 @@ export function PlacesForm(): React.JSX.Element {
 							variant="contained"
 							size="large"
 							fullWidth
-							disabled={isLoading || uploadLoading || updateIsLoading}
+							disabled={uploadLoading || updateIsLoading}
 						>
-							{params.id ? "Update Attraction" : "Create Attraction"}
+							{params.id ? "Update Place" : "Create Place"}
 						</Button>
 					</Grid>
 				</Grid>

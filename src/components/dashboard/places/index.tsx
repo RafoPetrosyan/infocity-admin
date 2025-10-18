@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useDeleteAttractionMutation, useLazyGetAttractionsQuery } from "@/store/attractions";
+import { useDeletePlaceMutation, useLazyGetPlacesQuery } from "@/store/places";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
@@ -33,8 +33,8 @@ export function Places(): React.JSX.Element {
 	const [limit, setLimit] = useState(10);
 	const [search, setSearch] = useState("");
 
-	const [trigger, { data, isLoading, isError }] = useLazyGetAttractionsQuery();
-	const [deleteAttraction, { isLoading: deleting }] = useDeleteAttractionMutation();
+	const [trigger, { data, isLoading, isError }] = useLazyGetPlacesQuery();
+	const [deletePlace, { isLoading: deleting }] = useDeletePlaceMutation();
 
 	// Confirmation dialog state
 	const [openConfirm, setOpenConfirm] = useState(false);
@@ -88,12 +88,12 @@ export function Places(): React.JSX.Element {
 	const handleConfirmDelete = async () => {
 		if (!selectedId) return;
 		try {
-			await deleteAttraction({ id: selectedId }).unwrap();
+			await deletePlace({ id: selectedId }).unwrap();
 			setOpenConfirm(false);
 			setSelectedId(null);
 			// Refresh list
 			trigger({ page, limit, search });
-			toast.success("Attraction deleted successfully");
+			toast.success("Place deleted successfully");
 		} catch (error: any) {
 			toast.error(error?.data?.message || "Error");
 			console.log("Delete failed:", error);
@@ -114,7 +114,7 @@ export function Places(): React.JSX.Element {
 					value={search}
 					onChange={handleSearch}
 					fullWidth
-					placeholder="Search attraction"
+					placeholder="Search place"
 					startAdornment={
 						<InputAdornment position="start">
 							<SearchOutlinedIcon />
@@ -137,14 +137,16 @@ export function Places(): React.JSX.Element {
 			{/* Table */}
 			<Card>
 				<Box sx={{ overflowX: "auto" }}>
-					<Table sx={{ minWidth: "1300px" }}>
+					<Table sx={{ minWidth: "2800px" }}>
 						<TableHead>
 							<TableRow>
 								<TableCell>Image</TableCell>
 								<TableCell>Name</TableCell>
 								<TableCell>Description</TableCell>
 								<TableCell>About</TableCell>
+								<TableCell>Owner</TableCell>
 								<TableCell>Slug</TableCell>
+								<TableCell>Address</TableCell>
 								<TableCell>Location</TableCell>
 								<TableCell
 									sx={{
@@ -163,20 +165,16 @@ export function Places(): React.JSX.Element {
 								{data?.data.map((row: any) => (
 									<TableRow hover key={row.id}>
 										<TableCell>
-											<Avatar src={row.image} alt={row.translation?.name || "Attraction"} variant="rounded" />
+											<Avatar src={row.image} alt={row.translation?.name || "Place"} variant="rounded" />
 										</TableCell>
-										<TableCell>{row.translation?.name}</TableCell>
+										<TableCell>{row.name}</TableCell>
 										<TableCell>
-											{row.translation?.description?.length > 50
-												? `${row.translation?.description.substring(0, 100)}...`
-												: row.translation?.description}
+											{row.description?.length > 50 ? `${row.description.substring(0, 100)}...` : row.description}
 										</TableCell>
-										<TableCell>
-											{row.translation?.about?.length > 50
-												? `${row.translation?.about.substring(0, 100)}...`
-												: row.translation?.about}
-										</TableCell>
+										<TableCell>{row.about?.length > 50 ? `${row.about.substring(0, 100)}...` : row.about}</TableCell>
+										<TableCell style={{ minWidth: 200 }}>{`${row.owner.first_name} ${row.owner.last_name}`}</TableCell>
 										<TableCell style={{ minWidth: 200 }}>{row.slug}</TableCell>
+										<TableCell style={{ minWidth: 200 }}>{row.address}</TableCell>
 										<TableCell style={{ minWidth: 150 }}>
 											<a
 												href={`https://www.google.com/maps?q=${row.latitude},${row.longitude}`}
@@ -199,7 +197,7 @@ export function Places(): React.JSX.Element {
 												height: "100%",
 											}}
 										>
-											<Link href={`/attractions/form/${row.id}`}>
+											<Link href={`/places/form/${row.id}`}>
 												<IconButton color="primary">
 													<EditIcon />
 												</IconButton>
