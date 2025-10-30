@@ -19,15 +19,27 @@ export interface LogoProps {
 }
 
 export function Logo({ color = 'dark', emblem, height = HEIGHT, width = WIDTH }: LogoProps): React.JSX.Element {
-  let url: string;
+  const resolvedColor = color === 'light' ? 'var(--mui-palette-common-white)' : 'var(--mui-palette-text-primary)';
 
-  if (emblem) {
-    url = color === 'light' ? '/assets/logo-emblem.svg' : '/assets/logo-emblem--dark.svg';
-  } else {
-    url = color === 'light' ? '/assets/logo.svg' : '/assets/logo--dark.svg';
-  }
-
-  return <Box alt="logo" component="img" height={height} src={url} width={width} />;
+  return (
+    <Box
+      component="span"
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        color: resolvedColor,
+        fontWeight: 800,
+        letterSpacing: '0.3px',
+        lineHeight: 1,
+        fontSize: `${height}px`,
+        // width kept to preserve layout spacing where previous image width was used
+        minWidth: width,
+      }}
+    >
+      Infocity admin
+    </Box>
+  );
 }
 
 export interface DynamicLogoProps {

@@ -1,9 +1,9 @@
 {
-  "name": "material-kit-react",
+  "name": "Infocity admin",
   "version": "4.1.0",
-  "author": "Devias",
+  "author": "Infocity",
   "licence": "MIT",
-  "homepage": "https://devias.io",
+  "homepage": "",
   "private": false,
   "scripts": {
     "dev": "next dev -p 3001",
