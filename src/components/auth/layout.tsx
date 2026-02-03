@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import RouterLink from "next/link";
 import Box from "@mui/material/Box";
@@ -11,7 +13,7 @@ export interface LayoutProps {
 	children: React.ReactNode;
 }
 
-export function Layout({ children }: LayoutProps): React.JSX.Element {
+export function Layout({ children }: LayoutProps) {
 	return (
 		<Box
 			sx={{
