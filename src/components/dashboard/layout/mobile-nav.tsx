@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import RouterLink from "next/link";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -54,11 +54,11 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
 			onClose={onClose}
 			open={open}
 		>
-			<Stack spacing={2} sx={{ p: 3 }}>
-				<Box component={RouterLink} href={paths.home} sx={{ display: "inline-flex" }}>
-					<Logo color="light" height={32} width={122} />
-				</Box>
-			</Stack>
+		<Stack spacing={2} sx={{ p: 3 }}>
+			<Link href={paths.home} style={{ display: "inline-flex", textDecoration: "none" }}>
+				<Logo color="light" height={32} width={122} />
+			</Link>
+		</Stack>
 			<Divider sx={{ borderColor: "var(--mui-palette-neutral-700)" }} />
 			<Box component="nav" sx={{ flex: "1 1 auto", p: "12px" }}>
 				{renderNavItems({ pathname, items: navItems })}
@@ -92,55 +92,108 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
 	const active = isNavItemActive({ disabled, external, href, matcher, pathname });
 	const Icon = icon ? navIcons[icon] : null;
 
-	return (
-		<li>
-			<Box
-				{...(href
-					? {
-							component: external ? "a" : RouterLink,
-							href,
-							target: external ? "_blank" : undefined,
-							rel: external ? "noreferrer" : undefined,
-						}
-					: { role: "button" })}
-				sx={{
-					alignItems: "center",
-					borderRadius: 1,
-					color: "var(--NavItem-color)",
-					cursor: "pointer",
-					display: "flex",
-					flex: "0 0 auto",
-					gap: 1,
-					p: "6px 16px",
-					position: "relative",
-					textDecoration: "none",
-					whiteSpace: "nowrap",
-					...(disabled && {
-						bgcolor: "var(--NavItem-disabled-background)",
-						color: "var(--NavItem-disabled-color)",
-						cursor: "not-allowed",
-					}),
-					...(active && { bgcolor: "var(--NavItem-active-background)", color: "var(--NavItem-active-color)" }),
-				}}
-			>
-				<Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", flex: "0 0 auto" }}>
-					{Icon ? (
-						<Icon
-							fill={active ? "var(--NavItem-icon-active-color)" : "var(--NavItem-icon-color)"}
-							fontSize="var(--icon-fontSize-md)"
-							weight={active ? "fill" : undefined}
-						/>
-					) : null}
-				</Box>
-				<Box sx={{ flex: "1 1 auto" }}>
-					<Typography
-						component="span"
-						sx={{ color: "inherit", fontSize: "0.875rem", fontWeight: 500, lineHeight: "28px" }}
-					>
-						{title}
-					</Typography>
-				</Box>
+	const content = (
+		<Box
+			{...(href && !external ? {} : { role: "button" })}
+			sx={{
+				alignItems: "center",
+				borderRadius: 1,
+				color: "var(--NavItem-color)",
+				cursor: "pointer",
+				display: "flex",
+				flex: "0 0 auto",
+				gap: 1,
+				p: "6px 16px",
+				position: "relative",
+				textDecoration: "none",
+				whiteSpace: "nowrap",
+				...(disabled && {
+					bgcolor: "var(--NavItem-disabled-background)",
+					color: "var(--NavItem-disabled-color)",
+					cursor: "not-allowed",
+				}),
+				...(active && { bgcolor: "var(--NavItem-active-background)", color: "var(--NavItem-active-color)" }),
+			}}
+		>
+			<Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", flex: "0 0 auto" }}>
+				{Icon ? (
+					<Icon
+						fill={active ? "var(--NavItem-icon-active-color)" : "var(--NavItem-icon-color)"}
+						fontSize="var(--icon-fontSize-md)"
+						weight={active ? "fill" : undefined}
+					/>
+				) : null}
 			</Box>
-		</li>
+			<Box sx={{ flex: "1 1 auto" }}>
+				<Typography
+					component="span"
+					sx={{ color: "inherit", fontSize: "0.875rem", fontWeight: 500, lineHeight: "28px" }}
+				>
+					{title}
+				</Typography>
+			</Box>
+		</Box>
 	);
+
+	if (href && !external) {
+		return (
+			<li>
+				<Link href={href} style={{ textDecoration: "none" }}>
+					{content}
+				</Link>
+			</li>
+		);
+	}
+
+	if (href && external) {
+		return (
+			<li>
+				<Box
+					component="a"
+					href={href}
+					target="_blank"
+					rel="noreferrer"
+					sx={{
+						alignItems: "center",
+						borderRadius: 1,
+						color: "var(--NavItem-color)",
+						cursor: "pointer",
+						display: "flex",
+						flex: "0 0 auto",
+						gap: 1,
+						p: "6px 16px",
+						position: "relative",
+						textDecoration: "none",
+						whiteSpace: "nowrap",
+						...(disabled && {
+							bgcolor: "var(--NavItem-disabled-background)",
+							color: "var(--NavItem-disabled-color)",
+							cursor: "not-allowed",
+						}),
+						...(active && { bgcolor: "var(--NavItem-active-background)", color: "var(--NavItem-active-color)" }),
+					}}
+				>
+					<Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", flex: "0 0 auto" }}>
+						{Icon ? (
+							<Icon
+								fill={active ? "var(--NavItem-icon-active-color)" : "var(--NavItem-icon-color)"}
+								fontSize="var(--icon-fontSize-md)"
+								weight={active ? "fill" : undefined}
+							/>
+						) : null}
+					</Box>
+					<Box sx={{ flex: "1 1 auto" }}>
+						<Typography
+							component="span"
+							sx={{ color: "inherit", fontSize: "0.875rem", fontWeight: 500, lineHeight: "28px" }}
+						>
+							{title}
+						</Typography>
+					</Box>
+				</Box>
+			</li>
+		);
+	}
+
+	return <li>{content}</li>;
 }
