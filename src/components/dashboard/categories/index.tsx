@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
 	useBulkUpdateCategoryOrderMutation,
 	useCreateCategoryMutation,
@@ -12,6 +13,7 @@ import {
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
 import {
 	Box,
 	Button,
@@ -33,6 +35,7 @@ import {
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { paths } from "@/paths";
 
 type FormValues = {
 	slug: string;
@@ -179,6 +182,7 @@ export function Categories(): React.JSX.Element {
 											<TableCell>EN</TableCell>
 											<TableCell>HY</TableCell>
 											<TableCell>RU</TableCell>
+											<TableCell>Sub Categories</TableCell>
 											<TableCell>Actions</TableCell>
 										</TableRow>
 									</TableHead>
@@ -208,6 +212,17 @@ export function Categories(): React.JSX.Element {
 														<TableCell>{getTranslation(row.translations, "en")}</TableCell>
 														<TableCell>{getTranslation(row.translations, "hy")}</TableCell>
 														<TableCell>{getTranslation(row.translations, "ru")}</TableCell>
+														<TableCell>
+															<Button
+																component={Link}
+																href={paths.dashboard.subCategories(row.id)}
+																size="small"
+																variant="outlined"
+																startIcon={<SubdirectoryArrowRightIcon />}
+															>
+																Sub Categories
+															</Button>
+														</TableCell>
 														<TableCell>
 															<IconButton onClick={() => handleOpen(row)}>
 																<EditIcon />

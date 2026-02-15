@@ -9,6 +9,7 @@ export const paths = {
 		emotions: "/emotions",
 		cities: "/cities",
 		categories: "/categories",
+		subCategories: (categoryId: string | number) => `/categories/${categoryId}/sub-categories`,
 		attractions: "/attractions",
 		places: "/places",
 		eventCategories: "/event-categories",

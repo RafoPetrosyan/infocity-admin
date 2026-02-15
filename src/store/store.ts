@@ -7,6 +7,7 @@ import { eventCategoriesApi } from "@/store/eventCategories";
 import { mobileApi } from "@/store/mobile";
 import { usersApi } from "@/store/users";
 import { placesApi } from "@/store/places";
+import { subCategoriesApi } from "@/store/subCategories";
 import { configureStore } from "@reduxjs/toolkit";
 
 import auth from "./auth/reducer";
@@ -24,6 +25,7 @@ export const makeStore = () => {
 			[attractionsApi.reducerPath]: attractionsApi.reducer,
 			[eventCategoriesApi.reducerPath]: eventCategoriesApi.reducer,
 			[placesApi.reducerPath]: placesApi.reducer,
+			[subCategoriesApi.reducerPath]: subCategoriesApi.reducer,
 		},
 		middleware: (getDefaultMiddleware) =>
 			getDefaultMiddleware().concat(
@@ -35,7 +37,8 @@ export const makeStore = () => {
 				mobileApi.middleware,
 				attractionsApi.middleware,
 				eventCategoriesApi.middleware,
-				placesApi.middleware
+				placesApi.middleware,
+				subCategoriesApi.middleware
 			),
 	});
 };
